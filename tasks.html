@@ -6,21 +6,33 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>タスク一覧</h1>
-  <div id="project-info"></div>
+  <!-- ヘッダー -->
+  <header>
+    <h1 class="page-title">タスク一覧</h1>
+  </header>
 
-  <div id="task-list-container">
-    <div id="task-list"></div>
-    <h3>新規タスク追加</h3>
-    <form id="task-form">
-      <input type="text" id="task-name" placeholder="タスク名" required>
-      <input type="date" id="task-deadline">
-      <input type="text" id="task-assignee" placeholder="担当者">
-      <button type="submit">追加</button>
-    </form>
-  </div>
+  <main>
+    <div id="project-info" class="project-info"></div>
 
-  <p style="text-align:center;"><a href="index.html">プロジェクト一覧に戻る</a></p>
+    <section id="task-list-container">
+      <div id="task-list"></div>
+      <h3 class="section-subtitle">新規タスク追加</h3>
+      <form id="task-form" class="form-inline">
+        <input type="text" id="task-name" placeholder="タスク名" required>
+        <input type="date" id="task-deadline">
+        <input type="text" id="task-assignee" placeholder="担当者">
+        <button type="submit" class="btn-primary">追加</button>
+      </form>
+    </section>
+
+    <p style="text-align:center;">
+      <a href="index.html" class="link-back">プロジェクト一覧に戻る</a>
+    </p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Task Management</p>
+  </footer>
 
   <!-- Firebase SDK -->
   <script type="module">
@@ -53,7 +65,8 @@
       const projectDoc = await getDoc(doc(db, "projects", projectId));
       if (projectDoc.exists()) {
         const project = projectDoc.data();
-        projectInfoDiv.innerHTML = `<h2>${project.name}</h2><p>${project.overview || ""}</p>`;
+        // Apple公式サイトっぽくシンプルに表示
+        projectInfoDiv.innerHTML = `<h2 class="section-title">${project.name}</h2>`;
       }
     }
     loadProjectInfo();
@@ -65,17 +78,18 @@
       snapshot.forEach((docSnap) => {
         const task = docSnap.data();
         const div = document.createElement("div");
-        div.className = "task" + (task.completed ? " completed" : "");
+        div.className = "task-card" + (task.completed ? " completed" : "");
         // カード内の内容（タスク名クリックで detail.html へ遷移）
         div.innerHTML = `
-          <input type="checkbox" ${task.completed ? "checked" : ""} data-id="${docSnap.id}" class="complete-checkbox">
-          <span class="task-name" data-id="${docSnap.id}" style="cursor:pointer; text-decoration:underline;">${task.name}</span>
-          <br>
-          <span>期限: ${task.deadline || "未設定"}</span>
-          <br>
-          <span>担当: ${task.assignee || "未設定"}</span>
-          <br>
-          <button data-id="${docSnap.id}" class="delete-btn">削除</button>
+          <div class="task-info">
+            <input type="checkbox" ${task.completed ? "checked" : ""} data-id="${docSnap.id}" class="complete-checkbox">
+            <span class="task-name" data-id="${docSnap.id}" style="cursor:pointer;">${task.name}</span>
+            <div class="task-meta">
+              <span>期限: ${task.deadline || "未設定"}</span> /
+              <span>担当: ${task.assignee || "未設定"}</span>
+            </div>
+          </div>
+          <button data-id="${docSnap.id}" class="btn-danger delete-btn">削除</button>
         `;
         // タスク名をクリックしたら detail.html へ遷移
         div.querySelector(".task-name").addEventListener("click", () => {
