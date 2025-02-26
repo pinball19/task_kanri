@@ -203,18 +203,18 @@ button {
   gap: 10px;
 }
 
-/* タスク名・その他の情報 */
-/* タスクのテキスト色を青に変更 */
+/* タスク名のみ青色に。ボタンの青 (#0071e3) と合わせています。 */
 .task-name {
   font-weight: 600;
   font-size: 1.3em;
   margin-left: 8px;
-  color: blue;
+  color: #0071e3;
 }
 
+/* タスクメタ情報はそのまま黒 */
 .task-meta {
   font-size: 1em;
-  color: blue;
+  color: #666;
 }
 
 /* --------------- Drag Handle --------------- */
@@ -241,10 +241,10 @@ button {
   margin-bottom: 10px;
 }
 
-/* タスク詳細内段落テキストを大きく */
+/* タスク詳細内の段落テキストはそのまま黒 */
 .task-detail-container p {
   font-size: 1.2em;
-  color: blue;
+  /* colorプロパティは指定せず、デフォルトの色(黒)に */
 }
 
 .checkbox-label {
@@ -284,7 +284,7 @@ button {
   border-radius: 4px;
 }
 
-/* --------------- コメント入力テキストサイズの拡大 --------------- */
+/* コメント入力テキストを大きくする */
 #comment-text {
   font-size: 1.3em;
 }
