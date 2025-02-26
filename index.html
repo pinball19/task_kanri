@@ -3,19 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <title>プロジェクト一覧</title>
+  <!-- 他ページと同様のデザインを適用するため、styles.css を読み込み -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <h1>プロジェクト一覧</h1>
-  <div id="project-list"></div>
 
-  <h2>新規プロジェクト追加</h2>
-  <form id="project-form">
-    <input type="text" id="project-name" placeholder="プロジェクト名" required>
-    <button type="submit">追加</button>
-  </form>
+  <!-- メインコンテナ -->
+  <div id="main-container">
+    <!-- プロジェクト一覧表示部 -->
+    <div id="project-list-container">
+      <div id="project-list"></div>
+    </div>
 
-  <!-- Firebase SDK（v9 Modular） -->
+    <!-- 新規プロジェクト追加フォーム -->
+    <div id="project-add-container">
+      <h2>新規プロジェクト追加</h2>
+      <form id="project-form">
+        <input type="text" id="project-name" placeholder="プロジェクト名" required>
+        <button type="submit">追加</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
@@ -40,11 +51,15 @@
     // プロジェクト一覧をリアルタイムで取得（プロジェクト名のみ表示）
     onSnapshot(projectsCol, (snapshot) => {
       projectListDiv.innerHTML = "";
-      snapshot.forEach((doc) => {
-        const project = doc.data();
+      snapshot.forEach((docSnap) => {
+        const project = docSnap.data();
         const div = document.createElement("div");
-        div.className = "project";
-        div.innerHTML = `<a href="tasks.html?projectId=${doc.id}"><strong>${project.name}</strong></a>`;
+        div.className = "project";  // CSSクラス
+        div.innerHTML = `
+          <a href="tasks.html?projectId=${docSnap.id}">
+            <strong>${project.name}</strong>
+          </a>
+        `;
         projectListDiv.appendChild(div);
       });
     });
