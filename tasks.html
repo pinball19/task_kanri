@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>タスク一覧</title>
   <link rel="stylesheet" href="styles.css">
   <!-- SortableJS の読み込み -->
@@ -64,7 +65,6 @@
       appId: "1:181737533274:web:c6091948efb2b4e7338d63",
       measurementId: "G-L9PWQP0Y53"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -75,7 +75,7 @@
     const projectInfoDiv = document.getElementById("project-info");
     const taskListDiv = document.getElementById("task-list");
 
-    // プロジェクト情報の読み込み
+    // プロジェクト情報を表示
     async function loadProjectInfo() {
       const projectDoc = await getDoc(doc(db, "projects", projectId));
       if (projectDoc.exists()) {
@@ -94,8 +94,7 @@
         const div = document.createElement("div");
         div.className = "task-card" + (task.completed ? " completed" : "");
 
-        // 左ブロック：タスク情報
-        // 右ブロック：削除ボタンとドラッグハンドル（横並び）
+        // 左ブロック：タスク情報、右ブロック：削除ボタンとドラッグハンドル（横並び）
         div.innerHTML = `
           <div class="task-left">
             <input type="checkbox" ${task.completed ? "checked" : ""} data-id="${docSnap.id}" class="complete-checkbox">
@@ -117,7 +116,7 @@
         taskListDiv.appendChild(div);
       });
 
-      // SortableJS 初期化（ドラッグハンドルを使用して並べ替え）
+      // SortableJS 初期化（ドラッグハンドルを利用して並べ替え）
       new Sortable(taskListDiv, {
         animation: 150,
         handle: '.drag-handle'
