@@ -3,12 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>プロジェクト一覧</title>
-  <style>
-    body { font-family: sans-serif; margin: 20px; }
-    .project { padding: 10px; border: 1px solid #ccc; margin-bottom: 8px; }
-    .project a { text-decoration: none; color: #333; }
-    form { margin-top: 20px; }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <h1>プロジェクト一覧</h1>
@@ -17,26 +12,24 @@
   <h2>新規プロジェクト追加</h2>
   <form id="project-form">
     <input type="text" id="project-name" placeholder="プロジェクト名" required>
-    <input type="text" id="project-status" placeholder="ステータス">
-    <input type="text" id="project-overview" placeholder="概要">
     <button type="submit">追加</button>
   </form>
 
   <!-- Firebase SDK（v9 Modular） -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, collection, getDocs, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // TODO: あなたのFirebase設定情報に置き換えてください
-const firebaseConfig = {
-  apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
-  authDomain: "taskkanri-12742.firebaseapp.com",
-  projectId: "taskkanri-12742",
-  storageBucket: "taskkanri-12742.firebasestorage.app",
-  messagingSenderId: "181737533274",
-  appId: "1:181737533274:web:c6091948efb2b4e7338d63",
-  measurementId: "G-L9PWQP0Y53"
-};
+    // Firebase設定（ご自身の設定情報に置換）
+    const firebaseConfig = {
+      apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
+      authDomain: "taskkanri-12742.firebaseapp.com",
+      projectId: "taskkanri-12742",
+      storageBucket: "taskkanri-12742.firebasestorage.app",
+      messagingSenderId: "181737533274",
+      appId: "1:181737533274:web:c6091948efb2b4e7338d63",
+      measurementId: "G-L9PWQP0Y53"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -44,31 +37,25 @@ const firebaseConfig = {
 
     const projectListDiv = document.getElementById("project-list");
 
-    // プロジェクト一覧をリアルタイムで取得
+    // プロジェクト一覧をリアルタイムで取得（プロジェクト名のみ表示）
     onSnapshot(projectsCol, (snapshot) => {
       projectListDiv.innerHTML = "";
       snapshot.forEach((doc) => {
         const project = doc.data();
         const div = document.createElement("div");
         div.className = "project";
-        // プロジェクト名・ステータス・概要を表示し、クリックでタスク一覧ページへ遷移（URLにプロジェクトIDを付与）
-        div.innerHTML = `<a href="tasks.html?projectId=${doc.id}">
-          <strong>${project.name}</strong> 
-          <em>${project.status || ""}</em><br>
-          ${project.overview || ""}</a>`;
+        div.innerHTML = `<a href="tasks.html?projectId=${doc.id}"><strong>${project.name}</strong></a>`;
         projectListDiv.appendChild(div);
       });
     });
 
-    // プロジェクト追加処理
+    // プロジェクト追加処理（プロジェクト名のみ）
     const projectForm = document.getElementById("project-form");
     projectForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("project-name").value;
-      const status = document.getElementById("project-status").value;
-      const overview = document.getElementById("project-overview").value;
       try {
-        await addDoc(projectsCol, { name, status, overview, createdAt: new Date() });
+        await addDoc(projectsCol, { name, createdAt: new Date() });
         projectForm.reset();
       } catch (error) {
         console.error("Error adding project: ", error);
