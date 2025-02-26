@@ -168,7 +168,7 @@ button {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* タスクカード：左ブロックと右ブロックに分ける */
+/* タスクカード：左右に分割 */
 .task-card {
   display: flex;
   align-items: center;
@@ -196,14 +196,14 @@ button {
   flex: 1;
 }
 
-/* 右ブロック：削除ボタンとドラッグハンドル */
+/* 右ブロック：削除ボタンとドラッグハンドルを横並びに */
 .task-right {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* タスク名・期限など */
+/* タスク名・その他の情報 */
 .task-name {
   font-weight: 600;
   font-size: 1.3em;
@@ -239,7 +239,7 @@ button {
   margin-bottom: 10px;
 }
 
-/* タスク詳細コンテナ内の段落テキストを大きくする */
+/* タスク詳細内段落テキストを大きく */
 .task-detail-container p {
   font-size: 1.2em;
 }
