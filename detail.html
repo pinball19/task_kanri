@@ -6,41 +6,55 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>タスク詳細</h1>
-  <div id="project-info"></div>
+  <!-- ヘッダー -->
+  <header>
+    <h1 class="page-title">タスク詳細</h1>
+  </header>
 
-  <div id="task-detail-container">
-    <!-- 表示モード -->
-    <div id="task-detail-view">
-      <div id="task-detail">タスクが選択されていません</div>
-      <button id="edit-btn">編集</button>
+  <main>
+    <div id="project-info" class="project-info"></div>
+
+    <div id="task-detail-container" class="task-detail-container">
+      <!-- 表示モード -->
+      <div id="task-detail-view" class="task-detail-view">
+        <div id="task-detail" class="task-detail">タスクが選択されていません</div>
+        <button id="edit-btn" class="btn-secondary">編集</button>
+      </div>
+      <!-- 編集モード（初期状態は非表示） -->
+      <div id="task-detail-edit" class="task-detail-edit" style="display: none;">
+        <h3 class="section-subtitle">タスク情報の編集</h3>
+        <form id="task-update-form">
+          <input type="text" id="upd-task-name" placeholder="タスク名" required>
+          <input type="date" id="upd-task-deadline">
+          <input type="text" id="upd-task-assignee" placeholder="担当者">
+          <label class="checkbox-label">
+            <input type="checkbox" id="upd-task-completed">
+            完了
+          </label>
+          <button type="submit" class="btn-primary">更新</button>
+          <button type="button" id="cancel-edit-btn" class="btn-secondary">キャンセル</button>
+        </form>
+      </div>
     </div>
-    <!-- 編集モード（初期状態は非表示） -->
-    <div id="task-detail-edit" style="display: none;">
-      <h3>タスク情報の編集</h3>
-      <form id="task-update-form">
-        <input type="text" id="upd-task-name" placeholder="タスク名" required>
-        <input type="date" id="upd-task-deadline">
-        <input type="text" id="upd-task-assignee" placeholder="担当者">
-        <label>
-          完了:
-          <input type="checkbox" id="upd-task-completed">
-        </label>
-        <button type="submit">更新</button>
-        <button type="button" id="cancel-edit-btn">キャンセル</button>
+
+    <section class="comment-section">
+      <h2 class="section-title">コメント</h2>
+      <div id="comments"></div>
+      <form id="comment-form" class="form-inline">
+        <textarea id="comment-text" placeholder="コメントを入力" rows="3" required></textarea>
+        <input type="file" id="comment-image">
+        <button type="submit" class="btn-primary">コメント追加</button>
       </form>
-    </div>
-  </div>
+    </section>
 
-  <h2>コメント</h2>
-  <div id="comments"></div>
-  <form id="comment-form">
-    <textarea id="comment-text" placeholder="コメントを入力" rows="3" required></textarea>
-    <input type="file" id="comment-image">
-    <button type="submit">コメント追加</button>
-  </form>
+    <p style="text-align:center;">
+      <a id="back-link" href="#" class="link-back">タスク一覧に戻る</a>
+    </p>
+  </main>
 
-  <p style="text-align:center;"><a id="back-link" href="#">タスク一覧に戻る</a></p>
+  <footer>
+    <p>&copy; 2025 Task Management</p>
+  </footer>
 
   <!-- Firebase SDK と Storage SDK -->
   <script type="module">
@@ -80,7 +94,7 @@
       const projectDoc = await getDoc(doc(db, "projects", projectId));
       if (projectDoc.exists()) {
         const project = projectDoc.data();
-        projectInfoDiv.innerHTML = `<h2>${project.name}</h2><p>${project.overview || ""}</p>`;
+        projectInfoDiv.innerHTML = `<h2 class="section-title">${project.name}</h2>`;
       }
     }
     loadProjectInfo();
@@ -92,7 +106,7 @@
       if (taskSnap.exists()) {
         const task = taskSnap.data();
         taskDetailDiv.innerHTML = `
-          <h3>${task.name}</h3>
+          <h3 class="task-detail-title">${task.name}</h3>
           <p>期限: ${task.deadline || "未設定"}</p>
           <p>担当: ${task.assignee || "未設定"}</p>
           <p>完了: ${task.completed ? "はい" : "いいえ"}</p>
@@ -147,7 +161,7 @@
         commentsDiv.innerHTML = "";
         snapshot.forEach((docSnap) => {
           const comment = docSnap.data();
-          let imageHtml = comment.imageUrl ? `<br><img src="${comment.imageUrl}" alt="コメント画像" style="max-width:200px;">` : "";
+          let imageHtml = comment.imageUrl ? `<br><img src="${comment.imageUrl}" alt="コメント画像" class="comment-image">` : "";
           const div = document.createElement("div");
           div.className = "comment";
           div.innerHTML = `<p>${comment.text}${imageHtml}</p>`;
