@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>タスク一覧</title>
   <link rel="stylesheet" href="styles.css">
+  <!-- SortableJS の読み込み（非モジュール版） -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
   <!-- ヘッダー -->
@@ -16,6 +18,7 @@
     <div id="project-info" class="project-info"></div>
 
     <section id="task-list-container">
+      <!-- タスク一覧のコンテナ（SortableJSで並べ替え対象） -->
       <div id="task-list"></div>
       <h3 class="section-subtitle">新規タスク追加</h3>
       <form id="task-form" class="form-inline">
@@ -90,9 +93,10 @@
         const task = docSnap.data();
         const div = document.createElement("div");
         div.className = "task-card" + (task.completed ? " completed" : "");
-        // カード内の内容（タスク名クリックで detail.html へ遷移）
+
+        // カード内を左ブロック（タスク情報）と右ブロック（削除ボタン＆ドラッグハンドル）に分ける
         div.innerHTML = `
-          <div class="task-info">
+          <div class="task-left">
             <input type="checkbox" ${task.completed ? "checked" : ""} data-id="${docSnap.id}" class="complete-checkbox">
             <span class="task-name" data-id="${docSnap.id}" style="cursor:pointer;">${task.name}</span>
             <div class="task-meta">
@@ -100,13 +104,23 @@
               <span>担当: ${task.assignee || "未設定"}</span>
             </div>
           </div>
-          <button data-id="${docSnap.id}" class="btn-danger delete-btn">削除</button>
+          <div class="task-right">
+            <button data-id="${docSnap.id}" class="btn-danger delete-btn">削除</button>
+            <div class="drag-handle">≡</div>
+          </div>
         `;
-        // タスク名クリックで detail.htmlへ
+        // タスク名クリックで detail.html へ遷移
         div.querySelector(".task-name").addEventListener("click", () => {
           window.location.href = `detail.html?projectId=${projectId}&taskId=${docSnap.id}`;
         });
         taskListDiv.appendChild(div);
+      });
+
+      // SortableJS を初期化（ドラッグハンドルを利用して並べ替え）
+      new Sortable(taskListDiv, {
+        animation: 150,
+        handle: '.drag-handle'
+        // ※ 並び替え結果をデータベースに保存する場合は onEnd イベントで order 更新の処理を追加してください
       });
     });
 
@@ -132,16 +146,14 @@
       }
     });
 
-    // タスク完了・削除
+    // タスク完了・削除のイベントリスナー
     taskListDiv.addEventListener("click", async (e) => {
       const id = e.target.getAttribute("data-id");
       if (e.target.classList.contains("complete-checkbox")) {
-        // 完了状態を更新
         const taskRef = doc(db, "tasks", id);
         const newStatus = e.target.checked;
         await updateDoc(taskRef, { completed: newStatus });
       } else if (e.target.classList.contains("delete-btn")) {
-        // 削除
         if (confirm("タスクを削除してもよろしいですか？")) {
           await deleteDoc(doc(db, "tasks", id));
         }
