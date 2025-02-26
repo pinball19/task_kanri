@@ -64,13 +64,12 @@
 
     // Firebase設定（ご自身の情報に置換）
     const firebaseConfig = {
-      apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
-      authDomain: "taskkanri-12742.firebaseapp.com",
-      projectId: "taskkanri-12742",
-      storageBucket: "taskkanri-12742.firebasestorage.app",
-      messagingSenderId: "181737533274",
-      appId: "1:181737533274:web:c6091948efb2b4e7338d63",
-      measurementId: "G-L9PWQP0Y53"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -86,7 +85,7 @@
     const taskDetailDiv = document.getElementById("task-detail");
     const backLink = document.getElementById("back-link");
 
-    // タスク一覧へ戻るリンクの設定
+    // タスク一覧へ戻るリンク
     backLink.href = `tasks.html?projectId=${projectId}`;
 
     // プロジェクト情報の読み込み
@@ -136,7 +135,7 @@
       detailViewDiv.style.display = "block";
     });
 
-    // タスク更新処理（編集フォーム）
+    // タスク更新処理
     const taskUpdateForm = document.getElementById("task-update-form");
     taskUpdateForm.addEventListener("submit", async (e) => {
       e.preventDefault();
