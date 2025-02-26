@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>プロジェクト一覧</title>
   <link rel="stylesheet" href="styles.css">
+  <!-- SortableJS の読み込み -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
   <!-- ヘッダー -->
@@ -41,7 +43,9 @@
       getFirestore, 
       collection, 
       addDoc, 
-      onSnapshot 
+      onSnapshot,
+      deleteDoc,
+      doc
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     // Firebase設定（ご自身の設定情報に置換）
@@ -69,13 +73,25 @@
         const project = docSnap.data();
         const div = document.createElement("div");
         div.className = "project-card";
-        // プロジェクト名のみ表示、クリックで tasks.html へ遷移
+        // 左側にプロジェクト名（クリックで tasks.html へ遷移）、右側に削除ボタンとドラッグハンドル
         div.innerHTML = `
-          <a href="tasks.html?projectId=${docSnap.id}" class="project-link">
-            <span class="project-name">${project.name}</span>
-          </a>
+          <div class="project-left">
+            <a href="tasks.html?projectId=${docSnap.id}" class="project-link">
+              <span class="project-name">${project.name}</span>
+            </a>
+          </div>
+          <div class="project-right">
+            <button data-id="${docSnap.id}" class="btn-danger delete-btn">削除</button>
+            <div class="drag-handle">≡</div>
+          </div>
         `;
         projectListDiv.appendChild(div);
+      });
+
+      // SortableJS を初期化（ドラッグハンドルを利用して並べ替え）
+      new Sortable(projectListDiv, {
+        animation: 150,
+        handle: '.drag-handle'
       });
     });
 
@@ -88,6 +104,16 @@
         projectForm.reset();
       } catch (error) {
         console.error("Error adding project: ", error);
+      }
+    });
+
+    // 削除ボタンのイベントリスナー
+    projectListDiv.addEventListener("click", async (e) => {
+      if (e.target.classList.contains("delete-btn")) {
+        const id = e.target.getAttribute("data-id");
+        if (confirm("プロジェクトを削除してもよろしいですか？")) {
+          await deleteDoc(doc(db, "projects", id));
+        }
       }
     });
   </script>
