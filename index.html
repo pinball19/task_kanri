@@ -3,28 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <title>プロジェクト一覧</title>
-  <!-- 他ページと同様のデザインを適用するため、styles.css を読み込み -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>プロジェクト一覧</h1>
+  <!-- ヘッダー -->
+  <header>
+    <h1 class="page-title">プロジェクト一覧</h1>
+  </header>
 
-  <div id="main-container">
+  <!-- メインコンテナ -->
+  <main id="main-container">
     <!-- 既存プロジェクト一覧 -->
-    <div id="project-list-container">
-      <h2>既存のプロジェクト</h2>
-      <div id="project-list"></div>
-    </div>
+    <section id="project-list-container">
+      <h2 class="section-title">既存のプロジェクト</h2>
+      <div id="project-list" class="project-list"></div>
+    </section>
 
     <!-- 新規プロジェクト追加フォーム -->
-    <div id="project-add-container">
-      <h3>新規プロジェクト追加</h3>
-      <form id="project-form">
+    <section id="project-add-container">
+      <h3 class="section-subtitle">新規プロジェクト追加</h3>
+      <form id="project-form" class="form-inline">
         <input type="text" id="project-name" placeholder="プロジェクト名" required>
-        <button type="submit">追加</button>
+        <button type="submit" class="btn-primary">追加</button>
       </form>
-    </div>
-  </div>
+    </section>
+  </main>
+
+  <!-- フッター（必要に応じて） -->
+  <footer>
+    <p>&copy; 2025 Task Management</p>
+  </footer>
 
   <!-- Firebase SDK -->
   <script type="module">
@@ -60,11 +68,10 @@
       snapshot.forEach((docSnap) => {
         const project = docSnap.data();
         const div = document.createElement("div");
-        div.className = "project-card";  // CSSクラスを変更
-
+        div.className = "project-card";
         // プロジェクト名のみ表示、クリックで tasks.html へ遷移
         div.innerHTML = `
-          <a href="tasks.html?projectId=${docSnap.id}">
+          <a href="tasks.html?projectId=${docSnap.id}" class="project-link">
             <span class="project-name">${project.name}</span>
           </a>
         `;
