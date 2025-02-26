@@ -3,17 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>タスク管理 - タスク一覧・詳細</title>
-  <style>
-    body { font-family: sans-serif; margin: 20px; }
-    /* 左右に配置するレイアウト（flex） */
-    #main-container { display: flex; gap: 20px; }
-    #task-list-container, #task-detail-container { flex: 1; }
-    .task { padding: 10px; border: 1px solid #ccc; margin-bottom: 8px; }
-    .task.completed { background-color: #e0ffe0; }
-    .task button { margin-left: 5px; }
-    form { margin-top: 20px; }
-    .comment { border-bottom: 1px solid #ccc; padding: 5px 0; }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <h1>タスク管理</h1>
@@ -65,7 +55,7 @@
     </div>
   </div>
 
-  <p><a href="index.html">プロジェクト一覧に戻る</a></p>
+  <p style="text-align:center;"><a href="index.html">プロジェクト一覧に戻る</a></p>
 
   <!-- Firebase SDK -->
   <script type="module">
@@ -84,6 +74,7 @@ const firebaseConfig = {
   appId: "1:181737533274:web:c6091948efb2b4e7338d63",
   measurementId: "G-L9PWQP0Y53"
 };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
