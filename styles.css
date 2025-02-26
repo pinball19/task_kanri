@@ -204,15 +204,17 @@ button {
 }
 
 /* タスク名・その他の情報 */
+/* タスクのテキスト色を青に変更 */
 .task-name {
   font-weight: 600;
   font-size: 1.3em;
   margin-left: 8px;
+  color: blue;
 }
 
 .task-meta {
   font-size: 1em;
-  color: #666;
+  color: blue;
 }
 
 /* --------------- Drag Handle --------------- */
@@ -242,6 +244,7 @@ button {
 /* タスク詳細内段落テキストを大きく */
 .task-detail-container p {
   font-size: 1.2em;
+  color: blue;
 }
 
 .checkbox-label {
@@ -279,4 +282,9 @@ button {
   max-width: 200px;
   margin-top: 5px;
   border-radius: 4px;
+}
+
+/* --------------- コメント入力テキストサイズの拡大 --------------- */
+#comment-text {
+  font-size: 1.3em;
 }
