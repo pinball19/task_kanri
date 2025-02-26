@@ -12,6 +12,7 @@
   </header>
 
   <main>
+    <!-- プロジェクト情報（タイトルなど） -->
     <div id="project-info" class="project-info"></div>
 
     <section id="task-list-container">
@@ -37,17 +38,27 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, collection, getDoc, addDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import {
+      getFirestore,
+      collection,
+      getDoc,
+      addDoc,
+      onSnapshot,
+      query,
+      where,
+      doc,
+      updateDoc,
+      deleteDoc
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     // Firebase設定（ご自身の情報に置換）
     const firebaseConfig = {
-      apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
-      authDomain: "taskkanri-12742.firebaseapp.com",
-      projectId: "taskkanri-12742",
-      storageBucket: "taskkanri-12742.firebasestorage.app",
-      messagingSenderId: "181737533274",
-      appId: "1:181737533274:web:c6091948efb2b4e7338d63",
-      measurementId: "G-L9PWQP0Y53"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -65,7 +76,6 @@
       const projectDoc = await getDoc(doc(db, "projects", projectId));
       if (projectDoc.exists()) {
         const project = projectDoc.data();
-        // Apple公式サイトっぽくシンプルに表示
         projectInfoDiv.innerHTML = `<h2 class="section-title">${project.name}</h2>`;
       }
     }
@@ -91,7 +101,7 @@
           </div>
           <button data-id="${docSnap.id}" class="btn-danger delete-btn">削除</button>
         `;
-        // タスク名をクリックしたら detail.html へ遷移
+        // タスク名クリックで detail.htmlへ
         div.querySelector(".task-name").addEventListener("click", () => {
           window.location.href = `detail.html?projectId=${projectId}&taskId=${docSnap.id}`;
         });
@@ -121,14 +131,16 @@
       }
     });
 
-    // タスク完了・削除のイベントリスナー
+    // タスク完了・削除
     taskListDiv.addEventListener("click", async (e) => {
       const id = e.target.getAttribute("data-id");
       if (e.target.classList.contains("complete-checkbox")) {
+        // 完了状態を更新
         const taskRef = doc(db, "tasks", id);
         const newStatus = e.target.checked;
         await updateDoc(taskRef, { completed: newStatus });
       } else if (e.target.classList.contains("delete-btn")) {
+        // 削除
         if (confirm("タスクを削除してもよろしいですか？")) {
           await deleteDoc(doc(db, "tasks", id));
         }
