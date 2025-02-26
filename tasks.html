@@ -2,26 +2,68 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>タスク一覧</title>
+  <title>タスク管理 - タスク一覧・詳細</title>
   <style>
     body { font-family: sans-serif; margin: 20px; }
+    /* 左右に配置するレイアウト（flex） */
+    #main-container { display: flex; gap: 20px; }
+    #task-list-container, #task-detail-container { flex: 1; }
     .task { padding: 10px; border: 1px solid #ccc; margin-bottom: 8px; }
     .task.completed { background-color: #e0ffe0; }
+    .task button { margin-left: 5px; }
     form { margin-top: 20px; }
+    .comment { border-bottom: 1px solid #ccc; padding: 5px 0; }
   </style>
 </head>
 <body>
-  <h1>タスク一覧</h1>
+  <h1>タスク管理</h1>
   <div id="project-info"></div>
-  <div id="task-list"></div>
 
-  <h2>新規タスク追加</h2>
-  <form id="task-form">
-    <input type="text" id="task-name" placeholder="タスク名" required>
-    <input type="date" id="task-deadline">
-    <input type="text" id="task-assignee" placeholder="担当者">
-    <button type="submit">追加</button>
-  </form>
+  <div id="main-container">
+    <!-- タスク一覧 -->
+    <div id="task-list-container">
+      <h2>タスク一覧</h2>
+      <div id="task-list"></div>
+      <h3>新規タスク追加</h3>
+      <form id="task-form">
+        <input type="text" id="task-name" placeholder="タスク名" required>
+        <input type="date" id="task-deadline">
+        <input type="text" id="task-assignee" placeholder="担当者">
+        <button type="submit">追加</button>
+      </form>
+    </div>
+
+    <!-- タスク詳細 -->
+    <div id="task-detail-container">
+      <h2>タスク詳細</h2>
+      <div id="task-detail">タスクが選択されていません</div>
+
+      <h3>タスク情報の編集</h3>
+      <form id="task-update-form">
+        <input type="text" id="upd-task-name" placeholder="タスク名" required>
+        <input type="date" id="upd-task-deadline">
+        <input type="text" id="upd-task-assignee" placeholder="担当者">
+        <label>
+          完了:
+          <input type="checkbox" id="upd-task-completed">
+        </label>
+        <button type="submit">更新</button>
+      </form>
+
+      <h3>添付ファイル</h3>
+      <!-- ※ Firebase Storage を利用する場合は、ここにアップロード用のコードを追加 -->
+      <input type="file" id="file-input">
+      <button id="upload-btn">アップロード</button>
+      <div id="file-preview"></div>
+
+      <h3>コメント</h3>
+      <div id="comments"></div>
+      <form id="comment-form">
+        <textarea id="comment-text" placeholder="コメントを入力" rows="3" required></textarea>
+        <button type="submit">コメント追加</button>
+      </form>
+    </div>
+  </div>
 
   <p><a href="index.html">プロジェクト一覧に戻る</a></p>
 
@@ -29,10 +71,10 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import {
-      getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, doc, deleteDoc, getDoc
+      getFirestore, collection, getDoc, addDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // TODO: あなたのFirebase設定情報に置き換えてください
+    // TODO: ご自身のFirebase設定情報に置き換えてください
 const firebaseConfig = {
   apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
   authDomain: "taskkanri-12742.firebaseapp.com",
@@ -42,7 +84,6 @@ const firebaseConfig = {
   appId: "1:181737533274:web:c6091948efb2b4e7338d63",
   measurementId: "G-L9PWQP0Y53"
 };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -52,8 +93,12 @@ const firebaseConfig = {
 
     const projectInfoDiv = document.getElementById("project-info");
     const taskListDiv = document.getElementById("task-list");
+    const taskDetailDiv = document.getElementById("task-detail");
 
-    // 選択中のプロジェクト情報を表示
+    let selectedTaskId = null;
+    let commentsUnsubscribe = null; // 既存のコメントリスナー解除用
+
+    // プロジェクト情報を表示
     async function loadProjectInfo() {
       const projectDoc = await getDoc(doc(db, "projects", projectId));
       if (projectDoc.exists()) {
@@ -63,7 +108,7 @@ const firebaseConfig = {
     }
     loadProjectInfo();
 
-    // タスク一覧を取得（タスクは "tasks" コレクション内に、projectIdフィールドで紐づけ）
+    // タスク一覧のリアルタイム取得
     const tasksQuery = query(collection(db, "tasks"), where("projectId", "==", projectId));
     onSnapshot(tasksQuery, (snapshot) => {
       taskListDiv.innerHTML = "";
@@ -73,18 +118,19 @@ const firebaseConfig = {
         div.className = "task" + (task.completed ? " completed" : "");
         div.innerHTML = `
           <input type="checkbox" ${task.completed ? "checked" : ""} data-id="${docSnap.id}" class="complete-checkbox">
-          <a href="detail.html?projectId=${projectId}&taskId=${docSnap.id}">
-            <strong>${task.name}</strong>
-          </a>
+          <span class="task-name" data-id="${docSnap.id}" style="cursor:pointer; text-decoration:underline;">${task.name}</span>
+          <br>
           <span>期限: ${task.deadline || "未設定"}</span>
+          <br>
           <span>担当: ${task.assignee || "未設定"}</span>
+          <br>
           <button data-id="${docSnap.id}" class="delete-btn">削除</button>
         `;
         taskListDiv.appendChild(div);
       });
     });
 
-    // タスク追加処理
+    // 新規タスク追加処理
     const taskForm = document.getElementById("task-form");
     taskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -106,19 +152,109 @@ const firebaseConfig = {
       }
     });
 
-    // タスク完了・削除のイベントリスナー（イベントデリゲーション）
+    // タスク一覧内のイベントリスナー（完了チェック、削除、タスク詳細表示）
     taskListDiv.addEventListener("click", async (e) => {
       const id = e.target.getAttribute("data-id");
       if (e.target.classList.contains("complete-checkbox")) {
-        // 完了状態をトグル更新
+        // 完了状態の更新
         const taskRef = doc(db, "tasks", id);
         const newStatus = e.target.checked;
         await updateDoc(taskRef, { completed: newStatus });
       } else if (e.target.classList.contains("delete-btn")) {
         if (confirm("タスクを削除してもよろしいですか？")) {
           await deleteDoc(doc(db, "tasks", id));
+          // 削除されたタスクが詳細表示中の場合、詳細エリアをクリア
+          if (selectedTaskId === id) {
+            selectedTaskId = null;
+            taskDetailDiv.innerHTML = "タスクが選択されていません";
+            if (commentsUnsubscribe) commentsUnsubscribe();
+          }
         }
+      } else if (e.target.classList.contains("task-name")) {
+        // タスク名クリックで詳細を表示
+        loadTaskDetail(id);
       }
+    });
+
+    // タスク詳細の読み込み
+    async function loadTaskDetail(taskId) {
+      selectedTaskId = taskId;
+      const taskRef = doc(db, "tasks", taskId);
+      const taskSnap = await getDoc(taskRef);
+      if (taskSnap.exists()) {
+        const task = taskSnap.data();
+        taskDetailDiv.innerHTML = `
+          <h3>${task.name}</h3>
+          <p>期限: ${task.deadline || "未設定"}</p>
+          <p>担当: ${task.assignee || "未設定"}</p>
+          <p>完了: ${task.completed ? "はい" : "いいえ"}</p>
+        `;
+        // 編集フォームに初期値をセット
+        document.getElementById("upd-task-name").value = task.name;
+        document.getElementById("upd-task-deadline").value = task.deadline || "";
+        document.getElementById("upd-task-assignee").value = task.assignee || "";
+        document.getElementById("upd-task-completed").checked = task.completed;
+      }
+
+      // コメントセクションの設定
+      const commentsDiv = document.getElementById("comments");
+      commentsDiv.innerHTML = "";
+      if (commentsUnsubscribe) commentsUnsubscribe();
+      const commentsCol = collection(db, "tasks", taskId, "comments");
+      commentsUnsubscribe = onSnapshot(commentsCol, (snapshot) => {
+        commentsDiv.innerHTML = "";
+        snapshot.forEach((docSnap) => {
+          const comment = docSnap.data();
+          const div = document.createElement("div");
+          div.className = "comment";
+          div.textContent = comment.text;
+          commentsDiv.appendChild(div);
+        });
+      });
+    }
+
+    // タスク更新処理
+    const taskUpdateForm = document.getElementById("task-update-form");
+    taskUpdateForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!selectedTaskId) {
+        alert("タスクが選択されていません");
+        return;
+      }
+      const name = document.getElementById("upd-task-name").value;
+      const deadline = document.getElementById("upd-task-deadline").value;
+      const assignee = document.getElementById("upd-task-assignee").value;
+      const completed = document.getElementById("upd-task-completed").checked;
+      const taskRef = doc(db, "tasks", selectedTaskId);
+      await updateDoc(taskRef, { name, deadline, assignee, completed });
+      loadTaskDetail(selectedTaskId);
+    });
+
+    // コメント追加処理
+    const commentForm = document.getElementById("comment-form");
+    commentForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!selectedTaskId) {
+        alert("タスクが選択されていません");
+        return;
+      }
+      const text = document.getElementById("comment-text").value;
+      const commentsCol = collection(db, "tasks", selectedTaskId, "comments");
+      await addDoc(commentsCol, { text, createdAt: new Date() });
+      commentForm.reset();
+    });
+
+    // ファイルアップロード処理のプレースホルダー
+    const uploadBtn = document.getElementById("upload-btn");
+    uploadBtn.addEventListener("click", () => {
+      const fileInput = document.getElementById("file-input");
+      if (fileInput.files.length === 0) {
+        alert("アップロードするファイルを選択してください");
+        return;
+      }
+      // ※ 実際は Firebase Storage SDK を利用してファイルをアップロードし、
+      //    アップロード後にそのURLをタスクドキュメントに保存する処理を実装してください。
+      alert("ファイルアップロード機能は未実装です");
     });
   </script>
 </body>
