@@ -2,67 +2,49 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>タスク詳細</title>
+  <title>プロジェクト一覧</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <!-- ヘッダー -->
   <header>
-    <h1 class="page-title">タスク詳細</h1>
+    <h1 class="page-title">プロジェクト一覧</h1>
   </header>
 
-  <main>
-    <div id="project-info" class="project-info"></div>
-
-    <div id="task-detail-container" class="task-detail-container">
-      <!-- 表示モード -->
-      <div id="task-detail-view" class="task-detail-view">
-        <div id="task-detail" class="task-detail">タスクが選択されていません</div>
-        <button id="edit-btn" class="btn-secondary">編集</button>
-      </div>
-      <!-- 編集モード（初期状態は非表示） -->
-      <div id="task-detail-edit" class="task-detail-edit" style="display: none;">
-        <h3 class="section-subtitle">タスク情報の編集</h3>
-        <form id="task-update-form">
-          <input type="text" id="upd-task-name" placeholder="タスク名" required>
-          <input type="date" id="upd-task-deadline">
-          <input type="text" id="upd-task-assignee" placeholder="担当者">
-          <label class="checkbox-label">
-            <input type="checkbox" id="upd-task-completed">
-            完了
-          </label>
-          <button type="submit" class="btn-primary">更新</button>
-          <button type="button" id="cancel-edit-btn" class="btn-secondary">キャンセル</button>
-        </form>
-      </div>
-    </div>
-
-    <section class="comment-section">
-      <h2 class="section-title">コメント</h2>
-      <div id="comments"></div>
-      <form id="comment-form" class="form-inline">
-        <textarea id="comment-text" placeholder="コメントを入力" rows="3" required></textarea>
-        <input type="file" id="comment-image">
-        <button type="submit" class="btn-primary">コメント追加</button>
-      </form>
+  <!-- メインコンテナ -->
+  <main id="main-container">
+    <!-- 既存プロジェクト一覧 -->
+    <section id="project-list-container">
+      <h2 class="section-title">既存のプロジェクト</h2>
+      <div id="project-list" class="project-list"></div>
     </section>
 
-    <p style="text-align:center;">
-      <a id="back-link" href="#" class="link-back">タスク一覧に戻る</a>
-    </p>
+    <!-- 新規プロジェクト追加フォーム -->
+    <section id="project-add-container">
+      <h3 class="section-subtitle">新規プロジェクト追加</h3>
+      <form id="project-form" class="form-inline">
+        <input type="text" id="project-name" placeholder="プロジェクト名" required>
+        <button type="submit" class="btn-primary">追加</button>
+      </form>
+    </section>
   </main>
 
+  <!-- フッター -->
   <footer>
     <p>&copy; 2025 Task Management</p>
   </footer>
 
-  <!-- Firebase SDK と Storage SDK -->
+  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      onSnapshot 
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // Firebase設定（ご自身の情報に置換）
+    // Firebase設定（ご自身の設定情報に置換）
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_AUTH_DOMAIN",
@@ -74,125 +56,38 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
+    const projectsCol = collection(db, "projects");
 
-    // URLパラメータから projectId と taskId を取得
-    const urlParams = new URLSearchParams(window.location.search);
-    const projectId = urlParams.get("projectId");
-    const taskId = urlParams.get("taskId");
+    const projectListDiv = document.getElementById("project-list");
+    const projectForm = document.getElementById("project-form");
 
-    const projectInfoDiv = document.getElementById("project-info");
-    const taskDetailDiv = document.getElementById("task-detail");
-    const backLink = document.getElementById("back-link");
-
-    // タスク一覧へ戻るリンク
-    backLink.href = `tasks.html?projectId=${projectId}`;
-
-    // プロジェクト情報の読み込み
-    async function loadProjectInfo() {
-      const projectDoc = await getDoc(doc(db, "projects", projectId));
-      if (projectDoc.exists()) {
-        const project = projectDoc.data();
-        projectInfoDiv.innerHTML = `<h2 class="section-title">${project.name}</h2>`;
-      }
-    }
-    loadProjectInfo();
-
-    // タスク詳細の読み込み
-    async function loadTaskDetail() {
-      const taskRef = doc(db, "tasks", taskId);
-      const taskSnap = await getDoc(taskRef);
-      if (taskSnap.exists()) {
-        const task = taskSnap.data();
-        taskDetailDiv.innerHTML = `
-          <h3 class="task-detail-title">${task.name}</h3>
-          <p>期限: ${task.deadline || "未設定"}</p>
-          <p>担当: ${task.assignee || "未設定"}</p>
-          <p>完了: ${task.completed ? "はい" : "いいえ"}</p>
+    // プロジェクト一覧をリアルタイムで取得（プロジェクト名のみ）
+    onSnapshot(projectsCol, (snapshot) => {
+      projectListDiv.innerHTML = "";
+      snapshot.forEach((docSnap) => {
+        const project = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "project-card";
+        // プロジェクト名のみ表示、クリックで tasks.html へ遷移
+        div.innerHTML = `
+          <a href="tasks.html?projectId=${docSnap.id}" class="project-link">
+            <span class="project-name">${project.name}</span>
+          </a>
         `;
-        // 編集フォームに初期値をセット
-        document.getElementById("upd-task-name").value = task.name;
-        document.getElementById("upd-task-deadline").value = task.deadline || "";
-        document.getElementById("upd-task-assignee").value = task.assignee || "";
-        document.getElementById("upd-task-completed").checked = task.completed;
-      }
-    }
-    loadTaskDetail();
-
-    // 編集モードの切替
-    const editBtn = document.getElementById("edit-btn");
-    const cancelEditBtn = document.getElementById("cancel-edit-btn");
-    const detailViewDiv = document.getElementById("task-detail-view");
-    const detailEditDiv = document.getElementById("task-detail-edit");
-
-    editBtn.addEventListener("click", () => {
-      detailViewDiv.style.display = "none";
-      detailEditDiv.style.display = "block";
-    });
-
-    cancelEditBtn.addEventListener("click", () => {
-      detailEditDiv.style.display = "none";
-      detailViewDiv.style.display = "block";
-    });
-
-    // タスク更新処理
-    const taskUpdateForm = document.getElementById("task-update-form");
-    taskUpdateForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("upd-task-name").value;
-      const deadline = document.getElementById("upd-task-deadline").value;
-      const assignee = document.getElementById("upd-task-assignee").value;
-      const completed = document.getElementById("upd-task-completed").checked;
-      const taskRef = doc(db, "tasks", taskId);
-      await updateDoc(taskRef, { name, deadline, assignee, completed });
-      await loadTaskDetail();
-      detailEditDiv.style.display = "none";
-      detailViewDiv.style.display = "block";
-    });
-
-    // コメントのリアルタイム取得
-    const commentsDiv = document.getElementById("comments");
-    let commentsUnsubscribe = null;
-    function loadComments() {
-      const commentsCol = collection(db, "tasks", taskId, "comments");
-      if (commentsUnsubscribe) commentsUnsubscribe();
-      commentsUnsubscribe = onSnapshot(commentsCol, (snapshot) => {
-        commentsDiv.innerHTML = "";
-        snapshot.forEach((docSnap) => {
-          const comment = docSnap.data();
-          let imageHtml = comment.imageUrl ? `<br><img src="${comment.imageUrl}" alt="コメント画像" class="comment-image">` : "";
-          const div = document.createElement("div");
-          div.className = "comment";
-          div.innerHTML = `<p>${comment.text}${imageHtml}</p>`;
-          commentsDiv.appendChild(div);
-        });
+        projectListDiv.appendChild(div);
       });
-    }
-    loadComments();
+    });
 
-    // コメント追加処理（テキスト＋画像）
-    const commentForm = document.getElementById("comment-form");
-    commentForm.addEventListener("submit", async (e) => {
+    // プロジェクト追加処理
+    projectForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const text = document.getElementById("comment-text").value;
-      const imageFile = document.getElementById("comment-image").files[0];
-      const commentsCol = collection(db, "tasks", taskId, "comments");
-
-      if (imageFile) {
-        // Firebase Storage に画像アップロード
-        const storageRef = ref(storage, `comments/${taskId}/${Date.now()}_${imageFile.name}`);
-        try {
-          const snapshot = await uploadBytes(storageRef, imageFile);
-          const imageUrl = await getDownloadURL(snapshot.ref);
-          await addDoc(commentsCol, { text, imageUrl, createdAt: new Date() });
-        } catch (error) {
-          console.error("Image upload error:", error);
-          alert("画像アップロードに失敗しました");
-        }
-      } else {
-        await addDoc(commentsCol, { text, createdAt: new Date() });
+      const name = document.getElementById("project-name").value;
+      try {
+        await addDoc(projectsCol, { name, createdAt: new Date() });
+        projectForm.reset();
+      } catch (error) {
+        console.error("Error adding project: ", error);
       }
-      commentForm.reset();
     });
   </script>
 </body>
