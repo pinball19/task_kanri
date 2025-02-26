@@ -9,16 +9,16 @@
 <body>
   <h1>プロジェクト一覧</h1>
 
-  <!-- メインコンテナ -->
   <div id="main-container">
-    <!-- プロジェクト一覧表示部 -->
+    <!-- 既存プロジェクト一覧 -->
     <div id="project-list-container">
+      <h2>既存のプロジェクト</h2>
       <div id="project-list"></div>
     </div>
 
     <!-- 新規プロジェクト追加フォーム -->
     <div id="project-add-container">
-      <h2>新規プロジェクト追加</h2>
+      <h3>新規プロジェクト追加</h3>
       <form id="project-form">
         <input type="text" id="project-name" placeholder="プロジェクト名" required>
         <button type="submit">追加</button>
@@ -29,7 +29,12 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      onSnapshot 
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     // Firebase設定（ご自身の設定情報に置換）
     const firebaseConfig = {
@@ -47,25 +52,27 @@
     const projectsCol = collection(db, "projects");
 
     const projectListDiv = document.getElementById("project-list");
+    const projectForm = document.getElementById("project-form");
 
-    // プロジェクト一覧をリアルタイムで取得（プロジェクト名のみ表示）
+    // プロジェクト一覧をリアルタイムで取得（プロジェクト名のみ）
     onSnapshot(projectsCol, (snapshot) => {
       projectListDiv.innerHTML = "";
       snapshot.forEach((docSnap) => {
         const project = docSnap.data();
         const div = document.createElement("div");
-        div.className = "project";  // CSSクラス
+        div.className = "project-card";  // CSSクラスを変更
+
+        // プロジェクト名のみ表示、クリックで tasks.html へ遷移
         div.innerHTML = `
           <a href="tasks.html?projectId=${docSnap.id}">
-            <strong>${project.name}</strong>
+            <span class="project-name">${project.name}</span>
           </a>
         `;
         projectListDiv.appendChild(div);
       });
     });
 
-    // プロジェクト追加処理（プロジェクト名のみ）
-    const projectForm = document.getElementById("project-form");
+    // プロジェクト追加処理
     projectForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("project-name").value;
