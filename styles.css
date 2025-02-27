@@ -16,7 +16,7 @@ body {
   background-color: #fafafa;
   color: #333;
   line-height: 1.8;
-  font-size: 18px; /* PC時のベースフォントサイズ */
+  font-size: 18px; /* PC/タブレット時のベースフォントサイズ */
 }
 
 /* リンクのベーススタイル */
@@ -121,7 +121,7 @@ form {
   gap: 10px;
 }
 
-/* フォーム要素のフォントサイズを16pxに（iOS対策） */
+/* iOS対策: フォーム要素のフォントサイズを16px以上に */
 input[type="text"],
 input[type="date"],
 textarea {
@@ -289,14 +289,28 @@ button {
 
 /* --------------- メディアクエリ（スマホ用） --------------- */
 @media (max-width: 600px) {
-  /* bodyのフォントサイズを16pxに */
+  /* body のフォントサイズを下げる */
   body {
     font-size: 16px;
   }
-  
+
   /* タスクカードを幅100%に */
   .task-card {
     width: 100%;
     margin-bottom: 15px;
+  }
+
+  /* 期限＆担当を改行表示に */
+  .task-meta span {
+    display: block;
+    margin-top: 3px; /* 適度な隙間 */
+  }
+
+  /* 削除ボタンを小さく＆目立たなく */
+  .btn-danger {
+    font-size: 0.8em;
+    padding: 4px 8px;
+    background-color: #ffbaba; /* 少し薄い赤 */
+    color: #444;              /* 文字も少し暗い色に */
   }
 }
