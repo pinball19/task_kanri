@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <!-- ★ ビューポート指定 -->
+  <!-- ビューポート指定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>タスク詳細</title>
   <link rel="stylesheet" href="styles.css">
@@ -49,7 +49,7 @@
     }
     /* Excel用アイコンサムネイルの例 */
     .excel-thumbnail {
-      width: 48px; /* お好みで調整 */
+      width: 48px;
       height: 48px;
       cursor: pointer;
     }
@@ -94,10 +94,10 @@
     <section class="comment-section">
       <h2 class="section-title">コメント</h2>
       <div id="comments"></div>
-      <!-- 画像やExcelなど色々なファイルを添付できるようaccept属性を変更 -->
+      <!-- ★ ファイル選択欄を上に配置 -->
       <form id="comment-form" class="form-inline">
-        <textarea id="comment-text" placeholder="コメントを入力" rows="3" required></textarea>
         <input type="file" id="comment-file" accept="image/*,.xls,.xlsx,.csv">
+        <textarea id="comment-text" placeholder="コメントを入力" rows="3" required></textarea>
         <button type="submit" class="btn-primary">コメント追加</button>
       </form>
     </section>
@@ -138,13 +138,13 @@
 
     // Firebase設定（ご自身の情報に置換してください）
     const firebaseConfig = {
-      apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
-      authDomain: "taskkanri-12742.firebaseapp.com",
-      projectId: "taskkanri-12742",
-      storageBucket: "taskkanri-12742.firebasestorage.app",
-      messagingSenderId: "181737533274",
-      appId: "1:181737533274:web:c6091948efb2b4e7338d63",
-      measurementId: "G-L9PWQP0Y53"
+      apiKey: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      authDomain: "XXXXXXX.firebaseapp.com",
+      projectId: "XXXXXXX",
+      storageBucket: "XXXXXXX.appspot.com",
+      messagingSenderId: "XXXXXXXXXXX",
+      appId: "1:XXXXXXXXXXX:web:XXXXXXX",
+      measurementId: "G-XXXXXXX"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -248,11 +248,10 @@
           div.className = "comment";
 
           let filePreviewHtml = "";
-          // ファイルがある場合のプレビュー処理
+          // ファイルがある場合のプレビュー
           if (comment.fileUrl) {
             const fileType = comment.fileType || "";
             if (fileType.includes("image")) {
-              // 画像の場合
               filePreviewHtml = `
                 <br>
                 <img
@@ -261,9 +260,7 @@
                   class="comment-image"
                 >
               `;
-            }
-            else if (fileType.includes("excel") || fileType.includes("spreadsheet")) {
-              // Excelの場合
+            } else if (fileType.includes("excel") || fileType.includes("spreadsheet")) {
               filePreviewHtml = `
                 <br>
                 <a href="${comment.fileUrl}" target="_blank">
@@ -305,7 +302,7 @@
       const commentsCol = collection(db, "tasks", taskId, "comments");
 
       if (file) {
-        // Firebase Storage へファイルアップロード
+        // Firebase Storage にファイルアップロード
         const storageRef = ref(storage, `comments/${taskId}/${Date.now()}_${file.name}`);
         try {
           const snapshot = await uploadBytes(storageRef, file);
@@ -330,7 +327,7 @@
       commentForm.reset();
     });
 
-    // 画像をクリックしたらポップアップ表示
+    // 画像クリック → ポップアップ表示
     function attachImageClickEvent() {
       const images = document.querySelectorAll(".comment-image");
       images.forEach((img) => {
@@ -343,13 +340,12 @@
       });
     }
 
-    // モーダルを閉じるイベント
+    // モーダルを閉じる
     const modalOverlay = document.getElementById("modal-overlay");
     const modalClose = document.getElementById("modal-close");
     modalClose.addEventListener("click", () => {
       modalOverlay.style.display = "none";
     });
-    // オーバーレイ部分をクリックしても閉じる
     modalOverlay.addEventListener("click", (e) => {
       if (e.target === modalOverlay) {
         modalOverlay.style.display = "none";
