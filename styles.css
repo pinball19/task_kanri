@@ -16,7 +16,7 @@ body {
   background-color: #fafafa;
   color: #333;
   line-height: 1.8;
-  font-size: 14px; /* ← 18px から 16px に変更 */
+  font-size: 18px; /* ← 18px から 16px に変更 */
 }
 
 /* リンクのベーススタイル */
