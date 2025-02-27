@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <!-- ★ ビューポート指定 -->
+  <!-- ビューポート指定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>プロジェクト一覧</title>
   <link rel="stylesheet" href="styles.css">
@@ -75,7 +75,7 @@
         const project = docSnap.data();
         const div = document.createElement("div");
         div.className = "project-card";
-        // 左側：プロジェクト名、右側：削除ボタンとドラッグハンドル
+        // 左側：プロジェクト名、右側：削除ボタン＆ドラッグハンドル
         div.innerHTML = `
           <div class="project-left">
             <a href="tasks.html?projectId=${docSnap.id}" class="project-link">
@@ -90,7 +90,7 @@
         projectListDiv.appendChild(div);
       });
 
-      // SortableJS を初期化
+      // SortableJS 初期化
       new Sortable(projectListDiv, {
         animation: 150,
         handle: '.drag-handle'
