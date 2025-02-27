@@ -5,7 +5,7 @@
   padding: 0;
 }
 
-/* ▼ iOS の自動文字拡大を防ぐ指定を追加 ▼ */
+/* iOS の自動文字拡大を防ぐ指定 */
 html {
   -webkit-text-size-adjust: 100%;
 }
@@ -16,7 +16,7 @@ body {
   background-color: #fafafa;
   color: #333;
   line-height: 1.8;
-  font-size: 18px;
+  font-size: 18px; /* PC時のベースフォントサイズ */
 }
 
 /* リンクのベーススタイル */
@@ -121,7 +121,7 @@ form {
   gap: 10px;
 }
 
-/* ★ フォーム要素のフォントサイズを16pxに（iOS対策） */
+/* フォーム要素のフォントサイズを16pxに（iOS対策） */
 input[type="text"],
 input[type="date"],
 textarea {
@@ -129,7 +129,7 @@ textarea {
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 16px; /* ← 16pxに */
+  font-size: 16px;
 }
 
 /* --------------- Buttons --------------- */
@@ -199,7 +199,7 @@ button {
   padding: 15px 20px;
   margin-bottom: 15px;
   transition: background-color 0.2s ease;
-  width: calc(100% - 40px); /* PC/タブレットではこれを使う */
+  width: calc(100% - 40px); /* PC/タブレット用 */
 }
 
 .task-card:hover {
@@ -289,6 +289,11 @@ button {
 
 /* --------------- メディアクエリ（スマホ用） --------------- */
 @media (max-width: 600px) {
+  /* bodyのフォントサイズを16pxに */
+  body {
+    font-size: 16px;
+  }
+  
   /* タスクカードを幅100%に */
   .task-card {
     width: 100%;
