@@ -2,6 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <!-- ★ 追加: ビューポート指定 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>タスク詳細</title>
   <link rel="stylesheet" href="styles.css">
 
@@ -145,7 +147,6 @@
       measurementId: "G-L9PWQP0Y53"
     };
 
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
@@ -252,7 +253,7 @@
             // MIMEタイプによって表示を分ける
             const fileType = comment.fileType || "";
             if (fileType.includes("image")) {
-              // 画像の場合は<img>タグ（サムネイル扱い）
+              // 画像
               filePreviewHtml = `
                 <br>
                 <img
@@ -266,8 +267,7 @@
               fileType.includes("excel") ||
               fileType.includes("spreadsheet")
             ) {
-              // Excelの場合は、Excel用アイコン画像をサムネイル代わりに表示
-              // クリックでダウンロード（または別タブで開く）
+              // Excel
               filePreviewHtml = `
                 <br>
                 <a href="${comment.fileUrl}" target="_blank">
@@ -281,7 +281,7 @@
               `;
             }
             else {
-              // その他ファイルはダウンロードリンクのみ
+              // その他ファイル
               filePreviewHtml = `
                 <br>
                 <a href="${comment.fileUrl}" target="_blank">
@@ -301,7 +301,7 @@
     }
     loadComments();
 
-    // コメント追加処理（テキスト＋ファイル）
+    // コメント追加処理
     const commentForm = document.getElementById("comment-form");
     commentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -318,7 +318,7 @@
           await addDoc(commentsCol, {
             text,
             fileUrl,
-            fileType: file.type, // MIMEタイプを記録
+            fileType: file.type,
             createdAt: new Date()
           });
         } catch (error) {
