@@ -95,13 +95,13 @@
         const div = document.createElement("div");
         div.className = "task-card" + (task.completed ? " completed" : "");
 
-        // 左ブロック + 右ブロック
+        // 「期限」と「担当」は span 2つに分け、スラッシュを削除 → スマホで改行させる
         div.innerHTML = `
           <div class="task-left">
             <input type="checkbox" ${task.completed ? "checked" : ""} data-id="${docSnap.id}" class="complete-checkbox">
             <span class="task-name" data-id="${docSnap.id}" style="cursor:pointer;">${task.name}</span>
             <div class="task-meta">
-              <span>期限: ${task.deadline || "未設定"}</span> /
+              <span>期限: ${task.deadline || "未設定"}</span>
               <span>担当: ${task.assignee || "未設定"}</span>
             </div>
           </div>
@@ -111,7 +111,7 @@
           </div>
         `;
 
-        // タスク名クリックで詳細ページへ
+        // タスク名クリックで detail.html へ遷移
         div.querySelector(".task-name").addEventListener("click", () => {
           window.location.href = `detail.html?projectId=${projectId}&taskId=${docSnap.id}`;
         });
@@ -119,7 +119,7 @@
         taskListDiv.appendChild(div);
       });
 
-      // SortableJS 初期化（ドラッグハンドル）
+      // SortableJS 初期化（ドラッグハンドルを利用）
       new Sortable(taskListDiv, {
         animation: 150,
         handle: '.drag-handle'
