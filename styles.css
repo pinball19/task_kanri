@@ -1,3 +1,9 @@
+
+html {
+  font-family: sans-serif; /* お好みで */
+  -webkit-text-size-adjust: 100%; /* iOS の自動拡大を防止 */
+}
+
 /* --------------- Reset --------------- */
 * {
   box-sizing: border-box;
