@@ -40,10 +40,20 @@
       cursor: pointer;
     }
 
-    /* コメントの画像（サムネイル） */
+    /* コメント内の画像またはアイコンのサムネイル表示 */
     .comment-image {
       max-width: 200px;
       cursor: pointer;
+    }
+    /* Excel用アイコンサムネイルの例 */
+    .excel-thumbnail {
+      width: 48px; /* お好みで調整 */
+      height: 48px;
+      cursor: pointer;
+    }
+    /* コメントコンテナ */
+    .comment {
+      margin-bottom: 1em;
     }
   </style>
 </head>
@@ -126,13 +136,13 @@
 
     // Firebase設定（ご自身の情報に置換してください）
     const firebaseConfig = {
-      apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
-      authDomain: "taskkanri-12742.firebaseapp.com",
-      projectId: "taskkanri-12742",
-      storageBucket: "taskkanri-12742.firebasestorage.app",
-      messagingSenderId: "181737533274",
-      appId: "1:181737533274:web:c6091948efb2b4e7338d63",
-      measurementId: "G-L9PWQP0Y53"
+      apiKey: "xxxx",
+      authDomain: "xxxx.firebaseapp.com",
+      projectId: "xxxx",
+      storageBucket: "xxxx.appspot.com",
+      messagingSenderId: "xxxx",
+      appId: "xxxx",
+      measurementId: "xxxx"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -239,12 +249,44 @@
           // ファイルがある場合のプレビュー処理
           if (comment.fileUrl) {
             // MIMEタイプによって表示を分ける
-            if (comment.fileType && comment.fileType.includes("image")) {
+            const fileType = comment.fileType || "";
+            if (fileType.includes("image")) {
               // 画像の場合は<img>タグ（サムネイル扱い）
-              filePreviewHtml = `<br><img src="${comment.fileUrl}" alt="コメント画像" class="comment-image">`;
-            } else {
-              // 画像以外（Excelなど）はダウンロードリンク
-              filePreviewHtml = `<br><a href="${comment.fileUrl}" target="_blank">添付ファイルを開く</a>`;
+              filePreviewHtml = `
+                <br>
+                <img
+                  src="${comment.fileUrl}"
+                  alt="コメント画像"
+                  class="comment-image"
+                >
+              `;
+            }
+            else if (
+              fileType.includes("excel") ||
+              fileType.includes("spreadsheet")
+            ) {
+              // Excelの場合は、Excel用アイコン画像をサムネイル代わりに表示
+              // クリックでダウンロード（または別タブで開く）
+              filePreviewHtml = `
+                <br>
+                <a href="${comment.fileUrl}" target="_blank">
+                  <img
+                    src="excel-icon.png"
+                    alt="Excelファイル"
+                    class="excel-thumbnail"
+                    title="Excelを開く"
+                  >
+                </a>
+              `;
+            }
+            else {
+              // その他ファイルはダウンロードリンクのみ
+              filePreviewHtml = `
+                <br>
+                <a href="${comment.fileUrl}" target="_blank">
+                  添付ファイルを開く
+                </a>
+              `;
             }
           }
 
