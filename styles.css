@@ -1,7 +1,6 @@
 
 html {
-  font-family: sans-serif; /* お好みで */
-  -webkit-text-size-adjust: 100%; /* iOS の自動拡大を防止 */
+  -webkit-text-size-adjust: 100%; /* iOS Safari の自動拡大を防ぐ */
 }
 
 /* --------------- Reset --------------- */
