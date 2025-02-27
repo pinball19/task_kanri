@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <!-- すでに入っているビューポート指定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>タスク一覧</title>
   <link rel="stylesheet" href="styles.css">
@@ -94,7 +95,8 @@
         const div = document.createElement("div");
         div.className = "task-card" + (task.completed ? " completed" : "");
 
-        // 左ブロック：タスク情報、右ブロック：削除ボタンとドラッグハンドル（横並び）
+        // 左ブロック: チェックボックス＋タスク名＋メタ情報
+        // 右ブロック: 削除ボタン＋ドラッグハンドル
         div.innerHTML = `
           <div class="task-left">
             <input type="checkbox" ${task.completed ? "checked" : ""} data-id="${docSnap.id}" class="complete-checkbox">
@@ -109,14 +111,16 @@
             <div class="drag-handle">≡</div>
           </div>
         `;
+
         // タスク名クリックで detail.html へ遷移
         div.querySelector(".task-name").addEventListener("click", () => {
           window.location.href = `detail.html?projectId=${projectId}&taskId=${docSnap.id}`;
         });
+
         taskListDiv.appendChild(div);
       });
 
-      // SortableJS 初期化（ドラッグハンドルを利用して並べ替え）
+      // SortableJS 初期化（ドラッグハンドルを利用）
       new Sortable(taskListDiv, {
         animation: 150,
         handle: '.drag-handle'
