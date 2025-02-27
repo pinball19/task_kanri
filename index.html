@@ -2,6 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <!-- ★ 追加: ビューポート指定 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>プロジェクト一覧</title>
   <link rel="stylesheet" href="styles.css">
   <!-- SortableJS の読み込み -->
@@ -66,14 +68,14 @@
     const projectListDiv = document.getElementById("project-list");
     const projectForm = document.getElementById("project-form");
 
-    // プロジェクト一覧をリアルタイムで取得（プロジェクト名のみ）
+    // プロジェクト一覧をリアルタイムで取得
     onSnapshot(projectsCol, (snapshot) => {
       projectListDiv.innerHTML = "";
       snapshot.forEach((docSnap) => {
         const project = docSnap.data();
         const div = document.createElement("div");
         div.className = "project-card";
-        // 左側にプロジェクト名（クリックで tasks.html へ遷移）、右側に削除ボタンとドラッグハンドル
+        // 左側：プロジェクト名、右側：削除ボタンとドラッグハンドル
         div.innerHTML = `
           <div class="project-left">
             <a href="tasks.html?projectId=${docSnap.id}" class="project-link">
@@ -88,7 +90,7 @@
         projectListDiv.appendChild(div);
       });
 
-      // SortableJS を初期化（ドラッグハンドルを利用して並べ替え）
+      // SortableJS を初期化
       new Sortable(projectListDiv, {
         animation: 150,
         handle: '.drag-handle'
