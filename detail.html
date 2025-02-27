@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <!-- ★ 追加: ビューポート指定 -->
+  <!-- ★ ビューポート指定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>タスク詳細</title>
   <link rel="stylesheet" href="styles.css">
@@ -250,10 +250,9 @@
           let filePreviewHtml = "";
           // ファイルがある場合のプレビュー処理
           if (comment.fileUrl) {
-            // MIMEタイプによって表示を分ける
             const fileType = comment.fileType || "";
             if (fileType.includes("image")) {
-              // 画像
+              // 画像の場合
               filePreviewHtml = `
                 <br>
                 <img
@@ -263,11 +262,8 @@
                 >
               `;
             }
-            else if (
-              fileType.includes("excel") ||
-              fileType.includes("spreadsheet")
-            ) {
-              // Excel
+            else if (fileType.includes("excel") || fileType.includes("spreadsheet")) {
+              // Excelの場合
               filePreviewHtml = `
                 <br>
                 <a href="${comment.fileUrl}" target="_blank">
@@ -279,8 +275,7 @@
                   >
                 </a>
               `;
-            }
-            else {
+            } else {
               // その他ファイル
               filePreviewHtml = `
                 <br>
@@ -310,7 +305,7 @@
       const commentsCol = collection(db, "tasks", taskId, "comments");
 
       if (file) {
-        // Firebase Storage にファイルアップロード
+        // Firebase Storage へファイルアップロード
         const storageRef = ref(storage, `comments/${taskId}/${Date.now()}_${file.name}`);
         try {
           const snapshot = await uploadBytes(storageRef, file);
@@ -335,7 +330,7 @@
       commentForm.reset();
     });
 
-    // ▼▼▼ 画像をクリックしたらポップアップ表示する関数 ▼▼▼
+    // 画像をクリックしたらポップアップ表示
     function attachImageClickEvent() {
       const images = document.querySelectorAll(".comment-image");
       images.forEach((img) => {
