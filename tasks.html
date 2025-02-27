@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <!-- すでに入っているビューポート指定 -->
+  <!-- ビューポート指定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>タスク一覧</title>
   <link rel="stylesheet" href="styles.css">
@@ -95,8 +95,7 @@
         const div = document.createElement("div");
         div.className = "task-card" + (task.completed ? " completed" : "");
 
-        // 左ブロック: チェックボックス＋タスク名＋メタ情報
-        // 右ブロック: 削除ボタン＋ドラッグハンドル
+        // 左ブロック + 右ブロック
         div.innerHTML = `
           <div class="task-left">
             <input type="checkbox" ${task.completed ? "checked" : ""} data-id="${docSnap.id}" class="complete-checkbox">
@@ -112,7 +111,7 @@
           </div>
         `;
 
-        // タスク名クリックで detail.html へ遷移
+        // タスク名クリックで詳細ページへ
         div.querySelector(".task-name").addEventListener("click", () => {
           window.location.href = `detail.html?projectId=${projectId}&taskId=${docSnap.id}`;
         });
@@ -120,14 +119,14 @@
         taskListDiv.appendChild(div);
       });
 
-      // SortableJS 初期化（ドラッグハンドルを利用）
+      // SortableJS 初期化（ドラッグハンドル）
       new Sortable(taskListDiv, {
         animation: 150,
         handle: '.drag-handle'
       });
     });
 
-    // 新規タスク追加処理
+    // 新規タスク追加
     const taskForm = document.getElementById("task-form");
     taskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -149,7 +148,7 @@
       }
     });
 
-    // タスク完了・削除のイベントリスナー
+    // タスク完了・削除
     taskListDiv.addEventListener("click", async (e) => {
       const id = e.target.getAttribute("data-id");
       if (e.target.classList.contains("complete-checkbox")) {
