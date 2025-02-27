@@ -121,7 +121,15 @@ form {
   gap: 10px;
 }
 
-/* iOS対策: フォーム要素のフォントサイズを16px以上に */
+/* ★コメントフォーム：常に縦並び */
+.comment-form {
+  display: flex;
+  flex-direction: column;  /* 縦に並べる */
+  gap: 10px;
+  max-width: 600px;       /* 必要に応じて幅調整 */
+  margin-top: 15px;
+}
+
 input[type="text"],
 input[type="date"],
 textarea {
@@ -129,7 +137,7 @@ textarea {
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 16px; /* iOS対策で16px以上推奨 */
 }
 
 /* --------------- Buttons --------------- */
@@ -303,14 +311,14 @@ button {
   /* 期限＆担当を改行表示に */
   .task-meta span {
     display: block;
-    margin-top: 3px; /* 適度な隙間 */
+    margin-top: 3px;
   }
 
   /* 削除ボタンを小さく＆目立たなく */
   .btn-danger {
     font-size: 0.8em;
     padding: 4px 8px;
-    background-color: #ffbaba; /* 少し薄い赤 */
-    color: #444;              /* 文字も少し暗い色に */
+    background-color: #ffbaba; /* 薄い赤 */
+    color: #444;              /* やや目立たなく */
   }
 }
