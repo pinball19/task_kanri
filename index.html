@@ -2,6 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <!-- ビューポート指定 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>プロジェクト一覧</title>
   <link rel="stylesheet" href="styles.css">
   <!-- SortableJS の読み込み -->
@@ -48,16 +50,16 @@
       doc
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // Firebase設定（ご自身の設定情報に置換）
-    const firebaseConfig = {
-      apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
-      authDomain: "taskkanri-12742.firebaseapp.com",
-      projectId: "taskkanri-12742",
-      storageBucket: "taskkanri-12742.firebasestorage.app",
-      messagingSenderId: "181737533274",
-      appId: "1:181737533274:web:c6091948efb2b4e7338d63",
-      measurementId: "G-L9PWQP0Y53"
-    };
+    // Firebase設定（置換してください）
+const firebaseConfig = {
+  apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
+  authDomain: "taskkanri-12742.firebaseapp.com",
+  projectId: "taskkanri-12742",
+  storageBucket: "taskkanri-12742.firebasestorage.app",
+  messagingSenderId: "181737533274",
+  appId: "1:181737533274:web:c6091948efb2b4e7338d63",
+  measurementId: "G-L9PWQP0Y53"
+};
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -66,14 +68,14 @@
     const projectListDiv = document.getElementById("project-list");
     const projectForm = document.getElementById("project-form");
 
-    // プロジェクト一覧をリアルタイムで取得（プロジェクト名のみ）
+    // プロジェクト一覧をリアルタイムで取得
     onSnapshot(projectsCol, (snapshot) => {
       projectListDiv.innerHTML = "";
       snapshot.forEach((docSnap) => {
         const project = docSnap.data();
         const div = document.createElement("div");
         div.className = "project-card";
-        // 左側にプロジェクト名（クリックで tasks.html へ遷移）、右側に削除ボタンとドラッグハンドル
+        // 左側：プロジェクト名、右側：削除ボタン＆ドラッグハンドル
         div.innerHTML = `
           <div class="project-left">
             <a href="tasks.html?projectId=${docSnap.id}" class="project-link">
@@ -88,7 +90,7 @@
         projectListDiv.appendChild(div);
       });
 
-      // SortableJS を初期化（ドラッグハンドルを利用して並べ替え）
+      // SortableJS 初期化
       new Sortable(projectListDiv, {
         animation: 150,
         handle: '.drag-handle'
