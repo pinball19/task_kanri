@@ -92,17 +92,26 @@ const firebaseConfig = {
       taskListDiv.innerHTML = "";
       snapshot.forEach((docSnap) => {
         const task = docSnap.data();
+        // ※チェックボックスとタスク情報を横並びにし、checkbox をカード左端かつ縦中央へ
         const div = document.createElement("div");
         div.className = "task-card" + (task.completed ? " completed" : "");
 
-        // 期限/担当を改行して表示
         div.innerHTML = `
           <div class="task-left">
-            <input type="checkbox" ${task.completed ? "checked" : ""} data-id="${docSnap.id}" class="complete-checkbox">
-            <span class="task-name" data-id="${docSnap.id}" style="cursor:pointer;">${task.name}</span>
-            <div class="task-meta">
-              <span>期限: ${task.deadline || "未設定"}</span>
-              <span>担当: ${task.assignee || "未設定"}</span>
+            <input
+              type="checkbox"
+              ${task.completed ? "checked" : ""}
+              data-id="${docSnap.id}"
+              class="complete-checkbox"
+            >
+            <div class="task-content">
+              <span class="task-name" data-id="${docSnap.id}" style="cursor:pointer;">
+                ${task.name}
+              </span>
+              <div class="task-meta">
+                <span>期限: ${task.deadline || "未設定"}</span>
+                <span>担当: ${task.assignee || "未設定"}</span>
+              </div>
             </div>
           </div>
           <div class="task-right">
