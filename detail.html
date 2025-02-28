@@ -7,11 +7,11 @@
   <title>タスク詳細</title>
   <link rel="stylesheet" href="styles.css">
 
-  <!-- 画像ポップアップ用の簡単なスタイルを追加 -->
+  <!-- 画像ポップアップ用スタイル -->
   <style>
-    /* 背景のオーバーレイ */
+    /* --- 画像拡大用のオーバーレイ (既存) --- */
     .modal-overlay {
-      display: none; /* デフォルトでは非表示 */
+      display: none;
       position: fixed;
       z-index: 9999;
       left: 0;
@@ -23,15 +23,12 @@
       justify-content: center;
       align-items: center;
     }
-
-    /* 拡大画像 */
     .modal-content {
       max-width: 90%;
       max-height: 90%;
       margin: auto;
       display: block;
     }
-
     .modal-close {
       position: absolute;
       top: 20px;
@@ -42,20 +39,51 @@
       cursor: pointer;
     }
 
-    /* コメント内の画像またはアイコンのサムネイル表示 */
+    /* --- コメント内の画像またはアイコンのサムネイル表示 (既存) --- */
     .comment-image {
       max-width: 200px;
       cursor: pointer;
     }
-    /* Excel用アイコンサムネイルの例 */
     .excel-thumbnail {
       width: 48px;
       height: 48px;
       cursor: pointer;
     }
-    /* コメントコンテナ */
     .comment {
       margin-bottom: 1em;
+    }
+
+    /* ▼▼ 新規：編集用モーダルのスタイル ▼▼ */
+    /* 背景オーバーレイは既存 .modal-overlay を流用 */
+
+    /* モーダル内部のカード領域 */
+    .edit-modal-dialog {
+      position: relative;
+      background: #fff;
+      border-radius: 4px;
+      padding: 20px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .edit-modal-dialog h3 {
+      margin-bottom: 10px;
+      font-size: 1.2em;
+      font-weight: 600;
+      text-align: center;
+    }
+    .edit-modal-dialog form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .edit-modal-dialog .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .edit-modal-dialog button {
+      align-self: flex-start; /* ボタンを左寄せに */
     }
   </style>
 </head>
@@ -72,37 +100,16 @@
       <!-- 表示モード -->
       <div id="task-detail-view" class="task-detail-view">
         <div id="task-detail" class="task-detail">タスクが選択されていません</div>
+        <!-- 編集ボタン → モーダルを開く -->
         <button id="edit-btn" class="btn-secondary">編集</button>
-      </div>
-      <!-- 編集モード（初期状態は非表示） -->
-      <div id="task-detail-edit" class="task-detail-edit" style="display: none;">
-        <h3 class="section-subtitle">タスク情報の編集</h3>
-        <form id="task-update-form">
-          <!-- タスク名 -->
-          <input type="text" id="upd-task-name" placeholder="タスク名" required>
-          <!-- 期限 -->
-          <input type="date" id="upd-task-deadline">
-          <!-- 担当者 -->
-          <input type="text" id="upd-task-assignee" placeholder="担当者">
-          <!-- 完了チェック -->
-          <label class="checkbox-label">
-            <input type="checkbox" id="upd-task-completed">
-            完了
-          </label>
-          <!-- ▼ メモ欄を追加 -->
-          <textarea id="upd-task-memo" rows="3" placeholder="メモ（概要など）"></textarea>
-
-          <button type="submit" class="btn-primary">更新</button>
-          <button type="button" id="cancel-edit-btn" class="btn-secondary">キャンセル</button>
-        </form>
       </div>
     </div>
 
     <section class="comment-section">
       <h2 class="section-title">コメント</h2>
       <div id="comments"></div>
-      <!-- コメントフォームを幅100%に合わせる -->
-      <form id="comment-form" class="comment-form" style="width: 100%;">
+      <!-- コメントフォーム：幅100% -->
+      <form id="comment-form" class="comment-form" style="width:100%;">
         <input type="file" id="comment-file" accept="image/*,.xls,.xlsx,.csv">
         <textarea id="comment-text" placeholder="コメントを入力" rows="3" required></textarea>
         <button type="submit" class="btn-primary">コメント追加</button>
@@ -118,13 +125,34 @@
     <p>&copy; 2025 Task Management</p>
   </footer>
 
-  <!-- 拡大表示用のモーダル要素 -->
+  <!-- 画像拡大用モーダル要素 (既存) -->
   <div id="modal-overlay" class="modal-overlay">
     <span id="modal-close" class="modal-close">&times;</span>
     <img id="modal-content" class="modal-content" alt="拡大画像">
   </div>
 
-  <!-- Firebase SDK と Storage SDK -->
+  <!-- ▼▼ 新規追加：編集用モーダル ▼▼ -->
+  <div id="edit-modal" class="modal-overlay">
+    <div class="edit-modal-dialog">
+      <span id="edit-modal-close" class="modal-close" style="color:#000; right:20px; top:20px;">&times;</span>
+      <h3 class="section-subtitle">タスク情報の編集</h3>
+      <form id="task-update-form-modal">
+        <input type="text" id="modal-upd-task-name" placeholder="タスク名" required>
+        <input type="date" id="modal-upd-task-deadline">
+        <input type="text" id="modal-upd-task-assignee" placeholder="担当者">
+        <label class="checkbox-label">
+          <input type="checkbox" id="modal-upd-task-completed">
+          完了
+        </label>
+        <textarea id="modal-upd-task-memo" rows="3" placeholder="メモ（概要など）"></textarea>
+
+        <button type="submit" class="btn-primary">更新</button>
+        <button type="button" id="modal-cancel-edit-btn" class="btn-secondary">キャンセル</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase SDK / Storage SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import {
@@ -143,7 +171,7 @@
       getDownloadURL
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
 
-    // Firebase設定（置換してください）
+    // Firebase設定
 const firebaseConfig = {
   apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
   authDomain: "taskkanri-12742.firebaseapp.com",
@@ -154,12 +182,11 @@ const firebaseConfig = {
   measurementId: "G-L9PWQP0Y53"
 };
 
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    // URLパラメータから projectId と taskId を取得
+    // URLパラメータ
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get("projectId");
     const taskId = urlParams.get("taskId");
@@ -171,7 +198,22 @@ const firebaseConfig = {
     // タスク一覧へ戻るリンク
     backLink.href = `tasks.html?projectId=${projectId}`;
 
-    // プロジェクト情報の読み込み
+    // モーダル要素
+    const editModal = document.getElementById("edit-modal");
+    const editModalClose = document.getElementById("edit-modal-close");
+    const modalCancelEditBtn = document.getElementById("modal-cancel-edit-btn");
+
+    // 編集フォーム（モーダル内）
+    const taskUpdateFormModal = document.getElementById("task-update-form-modal");
+
+    // フィールド参照
+    const modalTaskName = document.getElementById("modal-upd-task-name");
+    const modalTaskDeadline = document.getElementById("modal-upd-task-deadline");
+    const modalTaskAssignee = document.getElementById("modal-upd-task-assignee");
+    const modalTaskCompleted = document.getElementById("modal-upd-task-completed");
+    const modalTaskMemo = document.getElementById("modal-upd-task-memo");
+
+    // プロジェクト情報読み込み
     async function loadProjectInfo() {
       const projectDoc = await getDoc(doc(db, "projects", projectId));
       if (projectDoc.exists()) {
@@ -181,13 +223,12 @@ const firebaseConfig = {
     }
     loadProjectInfo();
 
-    // タスク詳細の読み込み
+    // タスク詳細読み込み
     async function loadTaskDetail() {
       const taskRef = doc(db, "tasks", taskId);
       const taskSnap = await getDoc(taskRef);
       if (taskSnap.exists()) {
         const task = taskSnap.data();
-        // 「完了: 完了済 / 未完了」 に表記を変更
         const statusText = task.completed ? "完了済" : "未完了";
 
         taskDetailDiv.innerHTML = `
@@ -197,48 +238,47 @@ const firebaseConfig = {
           <p>完了: ${statusText}</p>
           <p>メモ: ${task.memo || ""}</p>
         `;
-
-        // 編集フォームに初期値をセット
-        document.getElementById("upd-task-name").value = task.name;
-        document.getElementById("upd-task-deadline").value = task.deadline || "";
-        document.getElementById("upd-task-assignee").value = task.assignee || "";
-        document.getElementById("upd-task-completed").checked = task.completed;
-
-        // メモ欄
-        document.getElementById("upd-task-memo").value = task.memo || "";
+        // モーダルにも値を反映
+        modalTaskName.value = task.name;
+        modalTaskDeadline.value = task.deadline || "";
+        modalTaskAssignee.value = task.assignee || "";
+        modalTaskCompleted.checked = task.completed;
+        modalTaskMemo.value = task.memo || "";
       }
     }
     loadTaskDetail();
 
-    // 編集モードの切替
+    // 編集ボタン → モーダルを開く
     const editBtn = document.getElementById("edit-btn");
-    const cancelEditBtn = document.getElementById("cancel-edit-btn");
-    const detailViewDiv = document.getElementById("task-detail-view");
-    const detailEditDiv = document.getElementById("task-detail-edit");
-
     editBtn.addEventListener("click", () => {
-      detailViewDiv.style.display = "none";
-      detailEditDiv.style.display = "block";
+      editModal.style.display = "flex"; // 表示
     });
 
-    cancelEditBtn.addEventListener("click", () => {
-      detailEditDiv.style.display = "none";
-      detailViewDiv.style.display = "block";
+    // モーダル閉じる関数
+    function closeEditModal() {
+      editModal.style.display = "none";
+    }
+    // モーダル内の × ボタン
+    editModalClose.addEventListener("click", closeEditModal);
+    // キャンセルボタン
+    modalCancelEditBtn.addEventListener("click", closeEditModal);
+    // モーダル背景クリックで閉じる
+    editModal.addEventListener("click", (e) => {
+      if (e.target === editModal) {
+        closeEditModal();
+      }
     });
 
-    // タスク更新処理
-    const taskUpdateForm = document.getElementById("task-update-form");
-    taskUpdateForm.addEventListener("submit", async (e) => {
+    // モーダルの更新処理
+    taskUpdateFormModal.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const name = document.getElementById("upd-task-name").value;
-      const deadline = document.getElementById("upd-task-deadline").value;
-      const assignee = document.getElementById("upd-task-assignee").value;
-      const completed = document.getElementById("upd-task-completed").checked;
-      const memo = document.getElementById("upd-task-memo").value; // メモ欄
-
+      const name = modalTaskName.value;
+      const deadline = modalTaskDeadline.value;
+      const assignee = modalTaskAssignee.value;
+      const completed = modalTaskCompleted.checked;
+      const memo = modalTaskMemo.value;
       const taskRef = doc(db, "tasks", taskId);
 
-      // memo フィールドを含めて更新
       await updateDoc(taskRef, {
         name,
         deadline,
@@ -248,8 +288,7 @@ const firebaseConfig = {
       });
 
       await loadTaskDetail();
-      detailEditDiv.style.display = "none";
-      detailViewDiv.style.display = "block";
+      closeEditModal(); // モーダルを閉じる
     });
 
     // コメント表示領域
@@ -280,8 +319,7 @@ const firebaseConfig = {
                   class="comment-image"
                 >
               `;
-            }
-            else if (fileType.includes("excel") || fileType.includes("spreadsheet")) {
+            } else if (fileType.includes("excel") || fileType.includes("spreadsheet")) {
               filePreviewHtml = `
                 <br>
                 <a href="${comment.fileUrl}" target="_blank">
@@ -293,9 +331,7 @@ const firebaseConfig = {
                   >
                 </a>
               `;
-            }
-            else {
-              // その他ファイル
+            } else {
               filePreviewHtml = `
                 <br>
                 <a href="${comment.fileUrl}" target="_blank">
@@ -309,7 +345,6 @@ const firebaseConfig = {
           commentsDiv.appendChild(div);
         });
 
-        // 画像クリックで拡大表示するイベントを付与
         attachImageClickEvent();
       });
     }
@@ -324,7 +359,7 @@ const firebaseConfig = {
       const commentsCol = collection(db, "tasks", taskId, "comments");
 
       if (file) {
-        // Firebase Storage にファイルアップロード
+        // ファイルアップロード
         const storageRef = ref(storage, `comments/${taskId}/${Date.now()}_${file.name}`);
         try {
           const snapshot = await uploadBytes(storageRef, file);
@@ -340,7 +375,7 @@ const firebaseConfig = {
           alert("ファイルアップロードに失敗しました");
         }
       } else {
-        // ファイルなしの場合
+        // ファイルなし
         await addDoc(commentsCol, {
           text,
           createdAt: new Date()
@@ -349,7 +384,7 @@ const firebaseConfig = {
       commentForm.reset();
     });
 
-    // ▼▼▼ 画像をクリックしたらポップアップ表示する関数 ▼▼▼
+    // ▼ 画像クリックで拡大表示
     function attachImageClickEvent() {
       const images = document.querySelectorAll(".comment-image");
       images.forEach((img) => {
@@ -362,13 +397,12 @@ const firebaseConfig = {
       });
     }
 
-    // モーダルを閉じるイベント
+    // 画像モーダルを閉じる
     const modalOverlay = document.getElementById("modal-overlay");
     const modalClose = document.getElementById("modal-close");
     modalClose.addEventListener("click", () => {
       modalOverlay.style.display = "none";
     });
-    // オーバーレイ部分をクリックしても閉じる
     modalOverlay.addEventListener("click", (e) => {
       if (e.target === modalOverlay) {
         modalOverlay.style.display = "none";
