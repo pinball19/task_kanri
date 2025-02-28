@@ -2,28 +2,22 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <!-- ビューポート指定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>プロジェクト一覧</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- SortableJS の読み込み -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
-  <!-- ヘッダー -->
   <header>
     <h1 class="page-title">プロジェクト一覧</h1>
   </header>
 
-  <!-- メインコンテナ -->
   <main id="main-container">
-    <!-- ★ 「既存のプロジェクト」というテキストを削除 -->
     <section id="project-list-container">
-      <!-- <h2 class="section-title">既存のプロジェクト</h2> を削除 -->
+      <!-- すでに "既存のプロジェクト" タイトルを消している想定 -->
       <div id="project-list" class="project-list"></div>
     </section>
 
-    <!-- 新規プロジェクト追加フォーム -->
     <section id="project-add-container">
       <h3 class="section-subtitle">新規プロジェクト追加</h3>
       <form id="project-form" class="form-inline">
@@ -33,7 +27,6 @@
     </section>
   </main>
 
-  <!-- フッター -->
   <footer>
     <p>&copy; 2025 Task Management</p>
   </footer>
@@ -41,25 +34,29 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { 
-      getFirestore, 
-      collection, 
-      addDoc, 
+    import {
+      getFirestore,
+      collection,
+      addDoc,
       onSnapshot,
       deleteDoc,
-      doc
+      doc,
+      updateDoc,
+      query,
+      orderBy,
+      getDocs
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     // Firebase設定（置換してください）
-const firebaseConfig = {
-  apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
-  authDomain: "taskkanri-12742.firebaseapp.com",
-  projectId: "taskkanri-12742",
-  storageBucket: "taskkanri-12742.firebasestorage.app",
-  messagingSenderId: "181737533274",
-  appId: "1:181737533274:web:c6091948efb2b4e7338d63",
-  measurementId: "G-L9PWQP0Y53"
-};
+    const firebaseConfig = {
+      apiKey: "...",
+      authDomain: "...",
+      projectId: "...",
+      storageBucket: "...",
+      messagingSenderId: "...",
+      appId: "...",
+      measurementId: "..."
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -68,14 +65,36 @@ const firebaseConfig = {
     const projectListDiv = document.getElementById("project-list");
     const projectForm = document.getElementById("project-form");
 
+    // ★ 1) 新規プロジェクト追加時に order を設定
+    projectForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("project-name").value;
+      try {
+        // 例: order に Date.now() (タイムスタンプ) を入れる
+        await addDoc(projectsCol, {
+          name,
+          order: Date.now(),
+          createdAt: new Date()
+        });
+        projectForm.reset();
+      } catch (error) {
+        console.error("Error adding project: ", error);
+      }
+    });
+
+    // ★ 2) orderBy("order", "asc") で並び順を保証
+    const projectsQuery = query(projectsCol, orderBy("order", "asc"));
+
     // プロジェクト一覧をリアルタイムで取得
-    onSnapshot(projectsCol, (snapshot) => {
+    onSnapshot(projectsQuery, (snapshot) => {
       projectListDiv.innerHTML = "";
       snapshot.forEach((docSnap) => {
         const project = docSnap.data();
         const div = document.createElement("div");
         div.className = "project-card";
-        // 左側：プロジェクト名、右側：削除ボタン＆ドラッグハンドル
+        // data-id をカードに付与しておく
+        div.dataset.id = docSnap.id;
+
         div.innerHTML = `
           <div class="project-left">
             <a href="tasks.html?projectId=${docSnap.id}" class="project-link">
@@ -90,26 +109,27 @@ const firebaseConfig = {
         projectListDiv.appendChild(div);
       });
 
-      // SortableJS 初期化
+      // ★ 3) Sortable の onEnd で order フィールドを更新
       new Sortable(projectListDiv, {
         animation: 150,
-        handle: '.drag-handle'
+        handle: '.drag-handle',
+        onEnd: async () => {
+          // 現在の並び順を取得し、上から順に order を付ける
+          const cards = projectListDiv.querySelectorAll(".project-card");
+          // 順番に Firestore を更新
+          let index = 0;
+          for (let card of cards) {
+            const id = card.dataset.id;
+            await updateDoc(doc(db, "projects", id), {
+              order: index
+            });
+            index++;
+          }
+        }
       });
     });
 
-    // プロジェクト追加処理
-    projectForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("project-name").value;
-      try {
-        await addDoc(projectsCol, { name, createdAt: new Date() });
-        projectForm.reset();
-      } catch (error) {
-        console.error("Error adding project: ", error);
-      }
-    });
-
-    // 削除ボタンのイベントリスナー
+    // 削除ボタン
     projectListDiv.addEventListener("click", async (e) => {
       if (e.target.classList.contains("delete-btn")) {
         const id = e.target.getAttribute("data-id");
