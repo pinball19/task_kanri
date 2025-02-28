@@ -5,18 +5,19 @@
   padding: 0;
 }
 
-/* ▼ iOS の自動文字拡大を防ぐ指定を追加 ▼ */
+/* iOS の自動文字拡大を防ぐ指定 */
 html {
   -webkit-text-size-adjust: 100%;
 }
 
 /* --------------- Base --------------- */
 body {
+  /* Apple系フォントを先頭に */
   font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
   background-color: #fafafa;
   color: #333;
-  line-height: 1.8;
-  font-size: 18px; /* ← 18px から 16px に変更 */
+  line-height: 1.6;       /* 行間をやや広めに */
+  font-size: 17px;        /* iOS的に17pxくらいに */
 }
 
 /* リンクのベーススタイル */
@@ -24,7 +25,6 @@ a {
   color: inherit;
   text-decoration: none;
 }
-
 a:hover {
   text-decoration: underline;
 }
@@ -32,42 +32,43 @@ a:hover {
 /* --------------- Header / Footer --------------- */
 header, footer {
   text-align: center;
-  padding: 24px 0;
+  padding: 16px 0;    /* やや少なめに */
   background-color: #fff;
-  margin-bottom: 30px;
-  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px; /* 下マージンも控えめに */
+  box-shadow: 0 0 2px rgba(0,0,0,0.1);
 }
 
 footer {
-  margin-top: 40px;
+  margin-top: 20px;
 }
 
 .page-title {
-  font-size: 2.5em;
-  font-weight: 600;
+  font-size: 2em;         /* 2.5em -> 2em に抑えめ */
+  font-weight: 700;       /* やや強めの太字 */
   color: #111;
+  margin-bottom: 0.5em;   /* タイトル下余白 */
 }
 
 /* --------------- Main Container --------------- */
 #main-container {
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
 /* --------------- Section Titles --------------- */
 .section-title {
-  font-size: 1.8em;
+  font-size: 1.6em;    /* 1.8em -> 1.6em */
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   color: #111;
   text-align: center;
 }
 
 .section-subtitle {
-  font-size: 1.4em;
+  font-size: 1.2em;
   font-weight: 500;
-  margin: 20px 0 10px;
+  margin: 15px 0 10px;
 }
 
 /* --------------- Project List --------------- */
@@ -75,48 +76,40 @@ footer {
   margin-top: 20px;
 }
 
-/* プロジェクトカードのレイアウト */
 .project-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: #fff;
-  border-radius: 8px;
-  padding: 20px 25px;
+  /* Apple風に：角丸は小さく、軽い枠線と薄い影 */
+  border-radius: 4px;
+  border: 1px solid #eaeaea;
+  padding: 16px 20px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   transition: background-color 0.2s ease;
 }
-
 .project-card:hover {
-  background-color: #f5f5f7;
+  background-color: #f9f9f9;
 }
-
-/* 左側ブロック：プロジェクト名 */
 .project-left {
   flex: 1;
 }
-
 .project-link {
   display: block;
 }
-
 .project-name {
-  font-size: 1.5em;
+  font-size: 1.4em;
   font-weight: 600;
 }
-
-/* 右側ブロック：削除ボタンとドラッグハンドル */
 .project-right {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
 .drag-handle {
   cursor: move;
-  font-size: 1.5em;
-  padding: 0 10px;
+  font-size: 1.3em;
   color: #888;
 }
 
@@ -131,34 +124,43 @@ form {
   gap: 10px;
 }
 
+/* コメントフォーム：縦並び */
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 600px;
+  margin-top: 15px;
+}
+
 input[type="text"],
 input[type="date"],
 textarea {
   flex: 1;
   padding: 10px 12px;
   border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1em;
+  border-radius: 4px;       /* 角丸小さめ */
+  font-size: 16px;         /* iOS対策 */
 }
 
 /* --------------- Buttons --------------- */
 button {
   cursor: pointer;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;  /* 角丸を小さく */
   padding: 10px 16px;
-  font-size: 1.1em;
+  font-size: 1em;
   transition: background-color 0.2s ease;
 }
-
+/* iOSブルー */
 .btn-primary {
-  background-color: #0071e3;
+  background-color: #007aff;
   color: #fff;
 }
 .btn-primary:hover {
   background-color: #005bb5;
 }
-
+/* グレーのシンプルボタン */
 .btn-secondary {
   background-color: #f5f5f7;
   color: #333;
@@ -167,19 +169,19 @@ button {
 .btn-secondary:hover {
   background-color: #e0e0e2;
 }
-
+/* iOS赤 */
 .btn-danger {
   background-color: #ff3b30;
   color: #fff;
 }
 .btn-danger:hover {
-  background-color: #e62a20;
+  background-color: #d62a20;
 }
 
 /* --------------- Links --------------- */
 .link-back {
   font-size: 1em;
-  color: #0071e3;
+  color: #007aff; /* iOSブルーに */
   text-decoration: none;
 }
 .link-back:hover {
@@ -189,42 +191,41 @@ button {
 /* --------------- Tasks --------------- */
 #task-list-container {
   max-width: 800px;
-  margin: 0 auto 40px;
+  margin: 0 auto 20px; 
   background-color: #fff;
-  border-radius: 8px;
-  padding: 20px 25px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 4px;
+  border: 1px solid #eaeaea;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
-/* 新たに追加：タスク一覧内のカードを横並びに配置するため、タスク一覧コンテナに flex プロパティを追加 */
 #task-list {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
 }
 
-/* タスクカード：左右に分割 */
 .task-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #fafafa;
-  border-radius: 8px;
+  background-color: #fff;
+  border-radius: 4px;
+  border: 1px solid #eaeaea;
   padding: 15px 20px;
   margin-bottom: 15px;
   transition: background-color 0.2s ease;
-  width: calc(100% - 40px);  /* 横幅調整 */
+  width: calc(100% - 40px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
-
 .task-card:hover {
-  background-color: #f0f0f2;
+  background-color: #f9f9f9;
 }
-
 .task-card.completed {
-  background-color: #e0ffe0;
+  background-color: #e6fff0; /* 完了: 薄い緑系にしても可 */
 }
 
-/* 左ブロック：タスク情報 */
+/* タスク左ブロック */
 .task-left {
   display: flex;
   flex-direction: column;
@@ -232,63 +233,49 @@ button {
   flex: 1;
 }
 
-/* 右ブロック：削除ボタンとドラッグハンドル */
+/* タスク右ブロック */
 .task-right {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* タスク名のみ青色に（追加ボタンの青色 #0071e3 と合わせる） */
+/* タスク名をやや大きめ＆青 */
 .task-name {
   font-weight: 600;
-  font-size: 1.3em;
+  font-size: 1.1em;
   margin-left: 8px;
-  color: #0071e3;
+  color: #007aff;
 }
-
-/* タスクメタ情報はそのまま */
 .task-meta {
-  font-size: 1em;
+  font-size: 0.9em;
   color: #666;
-}
-
-/* --------------- Drag Handle --------------- */
-.drag-handle {
-  cursor: move;
-  font-size: 1.5em;
-  padding: 0 10px;
-  color: #888;
 }
 
 /* --------------- Detail --------------- */
 .task-detail-container {
   max-width: 800px;
-  margin: 0 auto 30px;
+  margin: 0 auto 20px;
   background-color: #fff;
-  border-radius: 8px;
-  padding: 20px 25px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 4px;
+  border: 1px solid #eaeaea;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
-
 .task-detail-title {
-  font-size: 1.5em;
+  font-size: 1.4em;
   font-weight: 600;
   margin-bottom: 10px;
 }
-
-/* タスク詳細内の段落テキストはそのまま */
 .task-detail-container p {
-  font-size: 1.2em;
+  font-size: 1em;
 }
-
 .checkbox-label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   margin-top: 10px;
 }
-
 .task-detail-edit {
   margin-top: 20px;
 }
@@ -296,30 +283,49 @@ button {
 /* --------------- Comments --------------- */
 .comment-section {
   max-width: 800px;
-  margin: 0 auto 40px;
-  padding: 20px 25px;
+  margin: 0 auto 20px;
+  padding: 20px;
   background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 4px;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
-
 #comments {
   margin-top: 15px;
 }
-
 .comment {
   border-bottom: 1px solid #eee;
   padding: 10px 0;
   font-size: 1em;
 }
-
 .comment-image {
   max-width: 200px;
   margin-top: 5px;
   border-radius: 4px;
 }
 
-/* --------------- コメント入力テキスト --------------- */
-#comment-text {
-  font-size: 1.3em;
+/* --------------- メディアクエリ（スマホ用） --------------- */
+@media (max-width: 600px) {
+  /* スマホでフォントサイズをやや下げる */
+  body {
+    font-size: 16px;
+  }
+
+  /* カード幅を100%に */
+  .task-card {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  /* 期限＆担当を改行表示 */
+  .task-meta span {
+    display: block;
+    margin-top: 3px;
+  }
+
+  /* 削除ボタンを少し小さく */
+  .btn-danger {
+    font-size: 0.9em;
+    padding: 6px 10px;
+  }
 }
