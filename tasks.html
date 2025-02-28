@@ -2,25 +2,20 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <!-- ビューポート指定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>タスク一覧</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- SortableJS の読み込み -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
-  <!-- ヘッダー -->
   <header>
     <h1 class="page-title">タスク一覧</h1>
   </header>
 
   <main>
-    <!-- プロジェクト情報 -->
     <div id="project-info" class="project-info"></div>
 
     <section id="task-list-container">
-      <!-- 並べ替え対象のタスク一覧 -->
       <div id="task-list"></div>
       <h3 class="section-subtitle">新規タスク追加</h3>
       <form id="task-form" class="form-inline">
@@ -51,12 +46,13 @@
       onSnapshot,
       query,
       where,
+      orderBy,
       doc,
       updateDoc,
       deleteDoc
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // Firebase設定（置換してください）
+    // Firebase設定
 const firebaseConfig = {
   apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
   authDomain: "taskkanri-12742.firebaseapp.com",
@@ -66,17 +62,42 @@ const firebaseConfig = {
   appId: "1:181737533274:web:c6091948efb2b4e7338d63",
   measurementId: "G-L9PWQP0Y53"
 };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // URLパラメータから projectId を取得
+    // URLパラメータ
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get("projectId");
 
     const projectInfoDiv = document.getElementById("project-info");
     const taskListDiv = document.getElementById("task-list");
+    const taskForm = document.getElementById("task-form");
 
-    // プロジェクト情報を表示
+    // 1) 新規タスク追加時に order を設定
+    taskForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("task-name").value;
+      const deadline = document.getElementById("task-deadline").value;
+      const assignee = document.getElementById("task-assignee").value;
+      try {
+        // order に Date.now() 等を入れておく
+        await addDoc(collection(db, "tasks"), {
+          projectId,
+          name,
+          deadline,
+          assignee,
+          completed: false,
+          order: Date.now(),
+          createdAt: new Date()
+        });
+        taskForm.reset();
+      } catch (error) {
+        console.error("Error adding task: ", error);
+      }
+    });
+
+    // プロジェクト情報
     async function loadProjectInfo() {
       const projectDoc = await getDoc(doc(db, "projects", projectId));
       if (projectDoc.exists()) {
@@ -86,28 +107,29 @@ const firebaseConfig = {
     }
     loadProjectInfo();
 
-    // タスク一覧のリアルタイム取得
-    const tasksQuery = query(collection(db, "tasks"), where("projectId", "==", projectId));
+    // 2) orderBy("order", "asc") でタスクを表示
+    const tasksQuery = query(
+      collection(db, "tasks"),
+      where("projectId", "==", projectId),
+      orderBy("order", "asc")
+    );
+
+    // タスク一覧リアルタイム取得
     onSnapshot(tasksQuery, (snapshot) => {
       taskListDiv.innerHTML = "";
       snapshot.forEach((docSnap) => {
         const task = docSnap.data();
-        // ※チェックボックスとタスク情報を横並びにし、checkbox をカード左端かつ縦中央へ
         const div = document.createElement("div");
         div.className = "task-card" + (task.completed ? " completed" : "");
+        // data-id を付与
+        div.dataset.id = docSnap.id;
 
+        // チェックボックス + タスク名 + メタ情報
         div.innerHTML = `
           <div class="task-left">
-            <input
-              type="checkbox"
-              ${task.completed ? "checked" : ""}
-              data-id="${docSnap.id}"
-              class="complete-checkbox"
-            >
+            <input type="checkbox" ${task.completed ? "checked" : ""} data-id="${docSnap.id}" class="complete-checkbox">
             <div class="task-content">
-              <span class="task-name" data-id="${docSnap.id}" style="cursor:pointer;">
-                ${task.name}
-              </span>
+              <span class="task-name" data-id="${docSnap.id}" style="cursor:pointer;">${task.name}</span>
               <div class="task-meta">
                 <span>期限: ${task.deadline || "未設定"}</span>
                 <span>担当: ${task.assignee || "未設定"}</span>
@@ -120,7 +142,7 @@ const firebaseConfig = {
           </div>
         `;
 
-        // タスク名クリックで detail.html へ遷移
+        // タスク名クリック → detail.html
         div.querySelector(".task-name").addEventListener("click", () => {
           window.location.href = `detail.html?projectId=${projectId}&taskId=${docSnap.id}`;
         });
@@ -128,36 +150,25 @@ const firebaseConfig = {
         taskListDiv.appendChild(div);
       });
 
-      // SortableJS 初期化（ドラッグハンドル）
+      // 3) Sortable の onEnd で order を更新
       new Sortable(taskListDiv, {
         animation: 150,
-        handle: '.drag-handle'
+        handle: '.drag-handle',
+        onEnd: async () => {
+          const cards = taskListDiv.querySelectorAll(".task-card");
+          let index = 0;
+          for (let card of cards) {
+            const id = card.dataset.id;
+            await updateDoc(doc(db, "tasks", id), {
+              order: index
+            });
+            index++;
+          }
+        }
       });
     });
 
-    // 新規タスク追加
-    const taskForm = document.getElementById("task-form");
-    taskForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("task-name").value;
-      const deadline = document.getElementById("task-deadline").value;
-      const assignee = document.getElementById("task-assignee").value;
-      try {
-        await addDoc(collection(db, "tasks"), {
-          projectId,
-          name,
-          deadline,
-          assignee,
-          completed: false,
-          createdAt: new Date()
-        });
-        taskForm.reset();
-      } catch (error) {
-        console.error("Error adding task: ", error);
-      }
-    });
-
-    // タスク完了・削除
+    // タスク完了・削除イベント
     taskListDiv.addEventListener("click", async (e) => {
       const id = e.target.getAttribute("data-id");
       if (e.target.classList.contains("complete-checkbox")) {
