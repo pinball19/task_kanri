@@ -2,6 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <!-- ビューポート指定 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>タスク詳細</title>
   <link rel="stylesheet" href="styles.css">
 
@@ -47,7 +49,7 @@
     }
     /* Excel用アイコンサムネイルの例 */
     .excel-thumbnail {
-      width: 48px; /* お好みで調整 */
+      width: 48px;
       height: 48px;
       cursor: pointer;
     }
@@ -92,10 +94,10 @@
     <section class="comment-section">
       <h2 class="section-title">コメント</h2>
       <div id="comments"></div>
-      <!-- 画像やExcelなど色々なファイルを添付できるようaccept属性を変更 -->
-      <form id="comment-form" class="form-inline">
-        <textarea id="comment-text" placeholder="コメントを入力" rows="3" required></textarea>
+      <!-- ★ 縦並びで配置 -->
+      <form id="comment-form" class="comment-form">
         <input type="file" id="comment-file" accept="image/*,.xls,.xlsx,.csv">
+        <textarea id="comment-text" placeholder="コメントを入力" rows="3" required></textarea>
         <button type="submit" class="btn-primary">コメント追加</button>
       </form>
     </section>
@@ -134,23 +136,22 @@
       getDownloadURL
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
 
-    // Firebase設定（ご自身の情報に置換してください）
-    const firebaseConfig = {
-      apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
-      authDomain: "taskkanri-12742.firebaseapp.com",
-      projectId: "taskkanri-12742",
-      storageBucket: "taskkanri-12742.firebasestorage.app",
-      messagingSenderId: "181737533274",
-      appId: "1:181737533274:web:c6091948efb2b4e7338d63",
-      measurementId: "G-L9PWQP0Y53"
-    };
-
+    // Firebase設定（置換してください）
+const firebaseConfig = {
+  apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
+  authDomain: "taskkanri-12742.firebaseapp.com",
+  projectId: "taskkanri-12742",
+  storageBucket: "taskkanri-12742.firebasestorage.app",
+  messagingSenderId: "181737533274",
+  appId: "1:181737533274:web:c6091948efb2b4e7338d63",
+  measurementId: "G-L9PWQP0Y53"
+};
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    // URLパラメータから projectId と taskId を取得
+    // URLパラメータ
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get("projectId");
     const taskId = urlParams.get("taskId");
@@ -247,12 +248,10 @@
           div.className = "comment";
 
           let filePreviewHtml = "";
-          // ファイルがある場合のプレビュー処理
+          // ファイルプレビュー
           if (comment.fileUrl) {
-            // MIMEタイプによって表示を分ける
             const fileType = comment.fileType || "";
             if (fileType.includes("image")) {
-              // 画像の場合は<img>タグ（サムネイル扱い）
               filePreviewHtml = `
                 <br>
                 <img
@@ -261,13 +260,7 @@
                   class="comment-image"
                 >
               `;
-            }
-            else if (
-              fileType.includes("excel") ||
-              fileType.includes("spreadsheet")
-            ) {
-              // Excelの場合は、Excel用アイコン画像をサムネイル代わりに表示
-              // クリックでダウンロード（または別タブで開く）
+            } else if (fileType.includes("excel") || fileType.includes("spreadsheet")) {
               filePreviewHtml = `
                 <br>
                 <a href="${comment.fileUrl}" target="_blank">
@@ -279,9 +272,8 @@
                   >
                 </a>
               `;
-            }
-            else {
-              // その他ファイルはダウンロードリンクのみ
+            } else {
+              // その他ファイル
               filePreviewHtml = `
                 <br>
                 <a href="${comment.fileUrl}" target="_blank">
@@ -295,13 +287,13 @@
           commentsDiv.appendChild(div);
         });
 
-        // 画像クリックで拡大表示するイベントを付与
+        // 画像クリックで拡大表示するイベント
         attachImageClickEvent();
       });
     }
     loadComments();
 
-    // コメント追加処理（テキスト＋ファイル）
+    // コメント追加処理
     const commentForm = document.getElementById("comment-form");
     commentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -310,7 +302,7 @@
       const commentsCol = collection(db, "tasks", taskId, "comments");
 
       if (file) {
-        // Firebase Storage にファイルアップロード
+        // Firebase Storage にアップロード
         const storageRef = ref(storage, `comments/${taskId}/${Date.now()}_${file.name}`);
         try {
           const snapshot = await uploadBytes(storageRef, file);
@@ -318,7 +310,7 @@
           await addDoc(commentsCol, {
             text,
             fileUrl,
-            fileType: file.type, // MIMEタイプを記録
+            fileType: file.type,
             createdAt: new Date()
           });
         } catch (error) {
@@ -326,7 +318,7 @@
           alert("ファイルアップロードに失敗しました");
         }
       } else {
-        // ファイルなしの場合
+        // ファイルなし
         await addDoc(commentsCol, {
           text,
           createdAt: new Date()
@@ -335,7 +327,7 @@
       commentForm.reset();
     });
 
-    // ▼▼▼ 画像をクリックしたらポップアップ表示する関数 ▼▼▼
+    // 画像クリック → ポップアップ
     function attachImageClickEvent() {
       const images = document.querySelectorAll(".comment-image");
       images.forEach((img) => {
@@ -348,13 +340,12 @@
       });
     }
 
-    // モーダルを閉じるイベント
+    // モーダル閉じるイベント
     const modalOverlay = document.getElementById("modal-overlay");
     const modalClose = document.getElementById("modal-close");
     modalClose.addEventListener("click", () => {
       modalOverlay.style.display = "none";
     });
-    // オーバーレイ部分をクリックしても閉じる
     modalOverlay.addEventListener("click", (e) => {
       if (e.target === modalOverlay) {
         modalOverlay.style.display = "none";
