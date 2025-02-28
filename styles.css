@@ -12,12 +12,11 @@ html {
 
 /* --------------- Base --------------- */
 body {
-  /* Apple系フォントを先頭に */
   font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
   background-color: #fafafa;
   color: #333;
-  line-height: 1.6;       /* 行間をやや広めに */
-  font-size: 17px;        /* iOS的に17pxくらいに */
+  line-height: 1.6;
+  font-size: 17px;
 }
 
 /* リンクのベーススタイル */
@@ -32,9 +31,9 @@ a:hover {
 /* --------------- Header / Footer --------------- */
 header, footer {
   text-align: center;
-  padding: 16px 0;    /* やや少なめに */
+  padding: 16px 0;
   background-color: #fff;
-  margin-bottom: 20px; /* 下マージンも控えめに */
+  margin-bottom: 20px;
   box-shadow: 0 0 2px rgba(0,0,0,0.1);
 }
 
@@ -43,10 +42,10 @@ footer {
 }
 
 .page-title {
-  font-size: 2em;         /* 2.5em -> 2em に抑えめ */
-  font-weight: 700;       /* やや強めの太字 */
+  font-size: 2em;
+  font-weight: 700;
   color: #111;
-  margin-bottom: 0.5em;   /* タイトル下余白 */
+  margin-bottom: 0.5em;
 }
 
 /* --------------- Main Container --------------- */
@@ -58,7 +57,7 @@ footer {
 
 /* --------------- Section Titles --------------- */
 .section-title {
-  font-size: 1.6em;    /* 1.8em -> 1.6em */
+  font-size: 1.6em;
   font-weight: 600;
   margin-bottom: 15px;
   color: #111;
@@ -81,7 +80,6 @@ footer {
   justify-content: space-between;
   align-items: center;
   background-color: #fff;
-  /* Apple風に：角丸は小さく、軽い枠線と薄い影 */
   border-radius: 4px;
   border: 1px solid #eaeaea;
   padding: 16px 20px;
@@ -139,19 +137,20 @@ textarea {
   flex: 1;
   padding: 10px 12px;
   border: 1px solid #ccc;
-  border-radius: 4px;       /* 角丸小さめ */
-  font-size: 16px;         /* iOS対策 */
+  border-radius: 4px;
+  font-size: 16px;
 }
 
 /* --------------- Buttons --------------- */
 button {
   cursor: pointer;
   border: none;
-  border-radius: 4px;  /* 角丸を小さく */
+  border-radius: 4px;
   padding: 10px 16px;
   font-size: 1em;
   transition: background-color 0.2s ease;
 }
+
 /* iOSブルー */
 .btn-primary {
   background-color: #007aff;
@@ -160,6 +159,7 @@ button {
 .btn-primary:hover {
   background-color: #005bb5;
 }
+
 /* グレーのシンプルボタン */
 .btn-secondary {
   background-color: #f5f5f7;
@@ -169,6 +169,7 @@ button {
 .btn-secondary:hover {
   background-color: #e0e0e2;
 }
+
 /* iOS赤 */
 .btn-danger {
   background-color: #ff3b30;
@@ -181,7 +182,7 @@ button {
 /* --------------- Links --------------- */
 .link-back {
   font-size: 1em;
-  color: #007aff; /* iOSブルーに */
+  color: #007aff;
   text-decoration: none;
 }
 .link-back:hover {
@@ -191,7 +192,7 @@ button {
 /* --------------- Tasks --------------- */
 #task-list-container {
   max-width: 800px;
-  margin: 0 auto 20px; 
+  margin: 0 auto 20px;
   background-color: #fff;
   border-radius: 4px;
   border: 1px solid #eaeaea;
@@ -205,6 +206,7 @@ button {
   gap: 20px;
 }
 
+/* タスクカード */
 .task-card {
   display: flex;
   align-items: center;
@@ -218,19 +220,27 @@ button {
   width: calc(100% - 40px);
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
+
+/* 完了時は薄いグレー */
+.task-card.completed {
+  background-color: #f0f0f0;
+}
+
 .task-card:hover {
   background-color: #f9f9f9;
 }
-.task-card.completed {
-  background-color: #e6fff0; /* 完了: 薄い緑系にしても可 */
-}
 
-/* タスク左ブロック */
+/* 左ブロック：チェックボックスとタスク情報を横並び、垂直中央 */
 .task-left {
   display: flex;
+  align-items: center;
+}
+
+/* タスク名・期限・担当を縦並び */
+.task-content {
+  display: flex;
   flex-direction: column;
-  gap: 6px;
-  flex: 1;
+  margin-left: 8px; /* チェックボックスとの隙間 */
 }
 
 /* タスク右ブロック */
@@ -244,7 +254,6 @@ button {
 .task-name {
   font-weight: 600;
   font-size: 1.1em;
-  margin-left: 8px;
   color: #007aff;
 }
 .task-meta {
@@ -306,24 +315,20 @@ button {
 
 /* --------------- メディアクエリ（スマホ用） --------------- */
 @media (max-width: 600px) {
-  /* スマホでフォントサイズをやや下げる */
   body {
     font-size: 16px;
   }
 
-  /* カード幅を100%に */
   .task-card {
     width: 100%;
     margin-bottom: 15px;
   }
 
-  /* 期限＆担当を改行表示 */
   .task-meta span {
     display: block;
     margin-top: 3px;
   }
 
-  /* 削除ボタンを少し小さく */
   .btn-danger {
     font-size: 0.9em;
     padding: 6px 10px;
