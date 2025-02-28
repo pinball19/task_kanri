@@ -78,13 +78,20 @@
       <div id="task-detail-edit" class="task-detail-edit" style="display: none;">
         <h3 class="section-subtitle">タスク情報の編集</h3>
         <form id="task-update-form">
+          <!-- タスク名 -->
           <input type="text" id="upd-task-name" placeholder="タスク名" required>
+          <!-- 期限 -->
           <input type="date" id="upd-task-deadline">
+          <!-- 担当者 -->
           <input type="text" id="upd-task-assignee" placeholder="担当者">
+          <!-- 完了チェック -->
           <label class="checkbox-label">
             <input type="checkbox" id="upd-task-completed">
             完了
           </label>
+          <!-- ▼ メモ欄を追加 -->
+          <textarea id="upd-task-memo" rows="3" placeholder="メモ（概要など）"></textarea>
+
           <button type="submit" class="btn-primary">更新</button>
           <button type="button" id="cancel-edit-btn" class="btn-secondary">キャンセル</button>
         </form>
@@ -94,8 +101,8 @@
     <section class="comment-section">
       <h2 class="section-title">コメント</h2>
       <div id="comments"></div>
-      <!-- ★ 縦並びで配置 -->
-      <form id="comment-form" class="comment-form">
+      <!-- コメントフォームを幅100%に合わせる -->
+      <form id="comment-form" class="comment-form" style="width: 100%;">
         <input type="file" id="comment-file" accept="image/*,.xls,.xlsx,.csv">
         <textarea id="comment-text" placeholder="コメントを入力" rows="3" required></textarea>
         <button type="submit" class="btn-primary">コメント追加</button>
@@ -147,11 +154,12 @@ const firebaseConfig = {
   measurementId: "G-L9PWQP0Y53"
 };
 
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    // URLパラメータ
+    // URLパラメータから projectId と taskId を取得
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get("projectId");
     const taskId = urlParams.get("taskId");
@@ -179,17 +187,25 @@ const firebaseConfig = {
       const taskSnap = await getDoc(taskRef);
       if (taskSnap.exists()) {
         const task = taskSnap.data();
+        // 「完了: 完了済 / 未完了」 に表記を変更
+        const statusText = task.completed ? "完了済" : "未完了";
+
         taskDetailDiv.innerHTML = `
           <h3 class="task-detail-title">${task.name}</h3>
           <p>期限: ${task.deadline || "未設定"}</p>
           <p>担当: ${task.assignee || "未設定"}</p>
-          <p>完了: ${task.completed ? "はい" : "いいえ"}</p>
+          <p>完了: ${statusText}</p>
+          <p>メモ: ${task.memo || ""}</p>
         `;
+
         // 編集フォームに初期値をセット
         document.getElementById("upd-task-name").value = task.name;
         document.getElementById("upd-task-deadline").value = task.deadline || "";
         document.getElementById("upd-task-assignee").value = task.assignee || "";
         document.getElementById("upd-task-completed").checked = task.completed;
+
+        // メモ欄
+        document.getElementById("upd-task-memo").value = task.memo || "";
       }
     }
     loadTaskDetail();
@@ -218,13 +234,17 @@ const firebaseConfig = {
       const deadline = document.getElementById("upd-task-deadline").value;
       const assignee = document.getElementById("upd-task-assignee").value;
       const completed = document.getElementById("upd-task-completed").checked;
+      const memo = document.getElementById("upd-task-memo").value; // メモ欄
+
       const taskRef = doc(db, "tasks", taskId);
 
+      // memo フィールドを含めて更新
       await updateDoc(taskRef, {
         name,
         deadline,
         assignee,
-        completed
+        completed,
+        memo
       });
 
       await loadTaskDetail();
@@ -248,7 +268,7 @@ const firebaseConfig = {
           div.className = "comment";
 
           let filePreviewHtml = "";
-          // ファイルプレビュー
+          // ファイルがある場合のプレビュー
           if (comment.fileUrl) {
             const fileType = comment.fileType || "";
             if (fileType.includes("image")) {
@@ -260,7 +280,8 @@ const firebaseConfig = {
                   class="comment-image"
                 >
               `;
-            } else if (fileType.includes("excel") || fileType.includes("spreadsheet")) {
+            }
+            else if (fileType.includes("excel") || fileType.includes("spreadsheet")) {
               filePreviewHtml = `
                 <br>
                 <a href="${comment.fileUrl}" target="_blank">
@@ -272,7 +293,8 @@ const firebaseConfig = {
                   >
                 </a>
               `;
-            } else {
+            }
+            else {
               // その他ファイル
               filePreviewHtml = `
                 <br>
@@ -287,7 +309,7 @@ const firebaseConfig = {
           commentsDiv.appendChild(div);
         });
 
-        // 画像クリックで拡大表示するイベント
+        // 画像クリックで拡大表示するイベントを付与
         attachImageClickEvent();
       });
     }
@@ -302,7 +324,7 @@ const firebaseConfig = {
       const commentsCol = collection(db, "tasks", taskId, "comments");
 
       if (file) {
-        // Firebase Storage にアップロード
+        // Firebase Storage にファイルアップロード
         const storageRef = ref(storage, `comments/${taskId}/${Date.now()}_${file.name}`);
         try {
           const snapshot = await uploadBytes(storageRef, file);
@@ -318,7 +340,7 @@ const firebaseConfig = {
           alert("ファイルアップロードに失敗しました");
         }
       } else {
-        // ファイルなし
+        // ファイルなしの場合
         await addDoc(commentsCol, {
           text,
           createdAt: new Date()
@@ -327,7 +349,7 @@ const firebaseConfig = {
       commentForm.reset();
     });
 
-    // 画像クリック → ポップアップ
+    // ▼▼▼ 画像をクリックしたらポップアップ表示する関数 ▼▼▼
     function attachImageClickEvent() {
       const images = document.querySelectorAll(".comment-image");
       images.forEach((img) => {
@@ -340,12 +362,13 @@ const firebaseConfig = {
       });
     }
 
-    // モーダル閉じるイベント
+    // モーダルを閉じるイベント
     const modalOverlay = document.getElementById("modal-overlay");
     const modalClose = document.getElementById("modal-close");
     modalClose.addEventListener("click", () => {
       modalOverlay.style.display = "none";
     });
+    // オーバーレイ部分をクリックしても閉じる
     modalOverlay.addEventListener("click", (e) => {
       if (e.target === modalOverlay) {
         modalOverlay.style.display = "none";
