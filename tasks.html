@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <!-- ビューポート指定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>タスク一覧</title>
   <link rel="stylesheet" href="styles.css">
@@ -55,16 +56,16 @@
       deleteDoc
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // Firebase設定（ご自身の情報に置換）
-    const firebaseConfig = {
-      apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
-      authDomain: "taskkanri-12742.firebaseapp.com",
-      projectId: "taskkanri-12742",
-      storageBucket: "taskkanri-12742.firebasestorage.app",
-      messagingSenderId: "181737533274",
-      appId: "1:181737533274:web:c6091948efb2b4e7338d63",
-      measurementId: "G-L9PWQP0Y53"
-    };
+    // Firebase設定（置換してください）
+const firebaseConfig = {
+  apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
+  authDomain: "taskkanri-12742.firebaseapp.com",
+  projectId: "taskkanri-12742",
+  storageBucket: "taskkanri-12742.firebasestorage.app",
+  messagingSenderId: "181737533274",
+  appId: "1:181737533274:web:c6091948efb2b4e7338d63",
+  measurementId: "G-L9PWQP0Y53"
+};
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -94,13 +95,13 @@
         const div = document.createElement("div");
         div.className = "task-card" + (task.completed ? " completed" : "");
 
-        // 左ブロック：タスク情報、右ブロック：削除ボタンとドラッグハンドル（横並び）
+        // 期限/担当を改行して表示
         div.innerHTML = `
           <div class="task-left">
             <input type="checkbox" ${task.completed ? "checked" : ""} data-id="${docSnap.id}" class="complete-checkbox">
             <span class="task-name" data-id="${docSnap.id}" style="cursor:pointer;">${task.name}</span>
             <div class="task-meta">
-              <span>期限: ${task.deadline || "未設定"}</span> /
+              <span>期限: ${task.deadline || "未設定"}</span>
               <span>担当: ${task.assignee || "未設定"}</span>
             </div>
           </div>
@@ -109,21 +110,23 @@
             <div class="drag-handle">≡</div>
           </div>
         `;
+
         // タスク名クリックで detail.html へ遷移
         div.querySelector(".task-name").addEventListener("click", () => {
           window.location.href = `detail.html?projectId=${projectId}&taskId=${docSnap.id}`;
         });
+
         taskListDiv.appendChild(div);
       });
 
-      // SortableJS 初期化（ドラッグハンドルを利用して並べ替え）
+      // SortableJS 初期化（ドラッグハンドル）
       new Sortable(taskListDiv, {
         animation: 150,
         handle: '.drag-handle'
       });
     });
 
-    // 新規タスク追加処理
+    // 新規タスク追加
     const taskForm = document.getElementById("task-form");
     taskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -145,7 +148,7 @@
       }
     });
 
-    // タスク完了・削除のイベントリスナー
+    // タスク完了・削除
     taskListDiv.addEventListener("click", async (e) => {
       const id = e.target.getAttribute("data-id");
       if (e.target.classList.contains("complete-checkbox")) {
