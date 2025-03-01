@@ -5,7 +5,7 @@
   padding: 0;
 }
 
-/* iOS の自動拡大抑制 */
+/* iOS の自動文字拡大を防ぐ指定 */
 html {
   -webkit-text-size-adjust: 100%;
 }
@@ -107,9 +107,9 @@ footer {
 /* --------------- Drag Handle (三本線) --------------- */
 .drag-handle {
   cursor: move;
-  /* 三本線をさらに大きく＆タップ領域拡大 */
-  font-size: 2em;
-  padding: 16px;
+  /* カードの高さはあまり増やさず、上下小さめ・左右大きめパディング */
+  font-size: 1.3em;   /* 三本線アイコン自体はそこそこ */
+  padding: 4px 16px; /* 上下4px, 左右16px → 横に広めのタップ領域 */
   display: inline-block;
   color: #888;
 }
