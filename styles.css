@@ -5,7 +5,7 @@
   padding: 0;
 }
 
-/* iOS の自動文字拡大を防ぐ指定 */
+/* iOS の自動拡大抑制 */
 html {
   -webkit-text-size-adjust: 100%;
 }
@@ -19,7 +19,7 @@ body {
   font-size: 17px;
 }
 
-/* リンクのベーススタイル */
+/* リンク */
 a {
   color: inherit;
   text-decoration: none;
@@ -63,7 +63,6 @@ footer {
   color: #111;
   text-align: center;
 }
-
 .section-subtitle {
   font-size: 1.2em;
   font-weight: 500;
@@ -74,7 +73,6 @@ footer {
 .project-list {
   margin-top: 20px;
 }
-
 .project-card {
   display: flex;
   justify-content: space-between;
@@ -105,9 +103,14 @@ footer {
   align-items: center;
   gap: 10px;
 }
+
+/* --------------- Drag Handle (三本線) --------------- */
 .drag-handle {
   cursor: move;
-  font-size: 1.3em;
+  /* 三本線をさらに大きく＆タップ領域拡大 */
+  font-size: 2em;
+  padding: 16px;
+  display: inline-block;
   color: #888;
 }
 
@@ -115,25 +118,24 @@ footer {
 form {
   margin-top: 10px;
 }
-
 .form-inline {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-/* コメントフォーム：幅を100%にし、要素も揃うように */
+/* コメントフォーム：フル幅に */
 .comment-form {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 100%; /* 背景カードに合わせてフル幅 */
+  width: 100%;
   margin-top: 15px;
 }
 .comment-form input[type="file"],
 .comment-form textarea,
 .comment-form button {
-  width: 100%; /* 各要素も横幅を100% */
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -156,7 +158,6 @@ button {
   font-size: 1em;
   transition: background-color 0.2s ease;
 }
-/* iOSブルー */
 .btn-primary {
   background-color: #007aff;
   color: #fff;
@@ -164,7 +165,6 @@ button {
 .btn-primary:hover {
   background-color: #005bb5;
 }
-/* グレーのシンプルボタン */
 .btn-secondary {
   background-color: #f5f5f7;
   color: #333;
@@ -173,7 +173,6 @@ button {
 .btn-secondary:hover {
   background-color: #e0e0e2;
 }
-/* iOS赤 */
 .btn-danger {
   background-color: #ff3b30;
   color: #fff;
@@ -202,13 +201,11 @@ button {
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
-
 #task-list {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
 }
-
 .task-card {
   display: flex;
   align-items: center;
@@ -244,7 +241,6 @@ button {
   align-items: center;
   gap: 10px;
 }
-/* タスク名をやや大きめ＆青 */
 .task-name {
   font-weight: 600;
   font-size: 1.1em;
@@ -304,15 +300,13 @@ button {
   border-radius: 4px;
 }
 
-/* --------------- Modal (画像拡大 + 編集) --------------- */
+/* --------------- Modal --------------- */
 .modal-overlay {
-  display: none; /* クリックで表示/非表示を切り替え */
+  display: none;
   position: fixed;
   z-index: 9999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
   overflow: auto;
   background-color: rgba(0,0,0,0.8);
   justify-content: center;
@@ -331,8 +325,6 @@ button {
   font-weight: bold;
   cursor: pointer;
 }
-
-/* 編集用モーダルの中身を別クラスに */
 .edit-modal-dialog {
   position: relative;
   background: #fff;
@@ -359,10 +351,10 @@ button {
   gap: 6px;
 }
 .edit-modal-dialog button {
-  align-self: flex-start; /* ボタンを左寄せ */
+  align-self: flex-start;
 }
 
-/* --------------- メディアクエリ（スマホ用） --------------- */
+/* --------------- Media Query (スマホ) --------------- */
 @media (max-width: 600px) {
   body {
     font-size: 16px;
