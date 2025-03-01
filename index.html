@@ -16,7 +16,6 @@
 
   <main id="main-container">
     <section id="project-list-container">
-      <!-- プロジェクトカードを並べる領域 -->
       <div id="project-list" class="project-list"></div>
     </section>
 
@@ -48,7 +47,9 @@
       orderBy
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // Firebase設定（ご自身のものに置換）
+    // ====================
+    // Firebase設定
+    // ====================
     const firebaseConfig = {
   apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
   authDomain: "taskkanri-12742.firebaseapp.com",
@@ -59,22 +60,28 @@
   measurementId: "G-L9PWQP0Y53"
 };
     
-    
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // ====================
+    // 要素参照
+    // ====================
     const projectListDiv = document.getElementById("project-list");
     const projectForm = document.getElementById("project-form");
 
-    // ★ Sortable 初期化のフラグ
+    // ====================
+    // Sortable初期化フラグ
+    // ====================
     let sortableInstance = null;
 
+    // ====================
     // 新規プロジェクト追加
+    // ====================
     projectForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("project-name").value;
       try {
-        // order フィールドに Date.now() などで順序管理
+        // order フィールドに Date.now() などを使い、並び順を管理
         await addDoc(collection(db, "projects"), {
           name,
           order: Date.now(),
@@ -86,17 +93,20 @@
       }
     });
 
-    // プロジェクト一覧を orderBy("order","asc") でリアルタイム取得
+    // ====================
+    // プロジェクト一覧をリアルタイム取得
+    // ====================
     const projectsQuery = query(collection(db, "projects"), orderBy("order", "asc"));
 
     onSnapshot(projectsQuery, (snapshot) => {
+      // まずDOMクリア
       projectListDiv.innerHTML = "";
 
       snapshot.forEach((docSnap) => {
         const project = docSnap.data();
         const div = document.createElement("div");
         div.className = "project-card";
-        div.dataset.id = docSnap.id;
+        div.dataset.id = docSnap.id; // Sortable終了時に参照
 
         div.innerHTML = `
           <div class="project-left">
@@ -109,22 +119,25 @@
             <div class="drag-handle">≡</div>
           </div>
         `;
+
         projectListDiv.appendChild(div);
       });
 
-      // ★ 初回のみ Sortable を初期化
+      // 初回のみ Sortable を初期化
       if (!sortableInstance) {
         sortableInstance = new Sortable(projectListDiv, {
           animation: 150,
           handle: '.drag-handle',
-          touchStartThreshold: 10, // モバイル対策
+          touchStartThreshold: 10, // スマホ対策
           onEnd: async () => {
-            // 並べ替え後の順序を Firestore に保存
+            // 並べ替え結果をFirestoreに反映
             const cards = projectListDiv.querySelectorAll(".project-card");
             let index = 0;
             for (const card of cards) {
               const id = card.dataset.id;
-              await updateDoc(doc(db, "projects", id), { order: index });
+              await updateDoc(doc(db, "projects", id), {
+                order: index
+              });
               index++;
             }
           }
@@ -132,7 +145,9 @@
       }
     });
 
-    // プロジェクト削除ボタン
+    // ====================
+    // 削除ボタン
+    // ====================
     projectListDiv.addEventListener("click", async (e) => {
       if (e.target.classList.contains("delete-btn")) {
         const id = e.target.getAttribute("data-id");
