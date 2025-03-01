@@ -2,9 +2,11 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <!-- ビューポート指定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>プロジェクト一覧</title>
   <link rel="stylesheet" href="styles.css">
+  <!-- SortableJS -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
@@ -14,7 +16,7 @@
 
   <main id="main-container">
     <section id="project-list-container">
-      <!-- すでに "既存のプロジェクト" タイトルを消している想定 -->
+      <!-- 「既存のプロジェクト」という見出しは削除 -->
       <div id="project-list" class="project-list"></div>
     </section>
 
@@ -43,11 +45,12 @@
       doc,
       updateDoc,
       query,
-      orderBy,
-      getDocs
+      orderBy
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // Firebase設定（置換してください）
+    // ====================
+    // Firebase設定
+    // ====================
 const firebaseConfig = {
   apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
   authDomain: "taskkanri-12742.firebaseapp.com",
@@ -58,20 +61,30 @@ const firebaseConfig = {
   measurementId: "G-L9PWQP0Y53"
 };
 
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const projectsCol = collection(db, "projects");
 
+    // ====================
+    // 要素参照
+    // ====================
     const projectListDiv = document.getElementById("project-list");
     const projectForm = document.getElementById("project-form");
 
-    // ★ 1) 新規プロジェクト追加時に order を設定
+    // ====================
+    // Sortable初期化フラグ
+    // ====================
+    let sortableInstance = null;
+
+    // ====================
+    // 新規プロジェクト追加
+    // ====================
     projectForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("project-name").value;
       try {
-        // 例: order に Date.now() (タイムスタンプ) を入れる
-        await addDoc(projectsCol, {
+        // orderにDate.now()を使う例 (連番でも可)
+        await addDoc(collection(db, "projects"), {
           name,
           order: Date.now(),
           createdAt: new Date()
@@ -82,18 +95,21 @@ const firebaseConfig = {
       }
     });
 
-    // ★ 2) orderBy("order", "asc") で並び順を保証
-    const projectsQuery = query(projectsCol, orderBy("order", "asc"));
+    // ====================
+    // プロジェクト一覧をリアルタイム取得
+    // ====================
+    // orderフィールドでソートし、並びを保証
+    const projectsQuery = query(collection(db, "projects"), orderBy("order", "asc"));
 
-    // プロジェクト一覧をリアルタイムで取得
     onSnapshot(projectsQuery, (snapshot) => {
+      // DOMをクリア
       projectListDiv.innerHTML = "";
+
       snapshot.forEach((docSnap) => {
         const project = docSnap.data();
         const div = document.createElement("div");
         div.className = "project-card";
-        // data-id をカードに付与しておく
-        div.dataset.id = docSnap.id;
+        div.dataset.id = docSnap.id; // Sortable終了時に参照するID
 
         div.innerHTML = `
           <div class="project-left">
@@ -106,33 +122,40 @@ const firebaseConfig = {
             <div class="drag-handle">≡</div>
           </div>
         `;
+
         projectListDiv.appendChild(div);
       });
 
-      // ★ 3) Sortable の onEnd で order フィールドを更新
-      new Sortable(projectListDiv, {
-        animation: 150,
-        handle: '.drag-handle',
-        onEnd: async () => {
-          // 現在の並び順を取得し、上から順に order を付ける
-          const cards = projectListDiv.querySelectorAll(".project-card");
-          // 順番に Firestore を更新
-          let index = 0;
-          for (let card of cards) {
-            const id = card.dataset.id;
-            await updateDoc(doc(db, "projects", id), {
-              order: index
-            });
-            index++;
+      // 初回のみ Sortable を初期化
+      if (!sortableInstance) {
+        sortableInstance = new Sortable(projectListDiv, {
+          animation: 150,
+          handle: '.drag-handle',
+          onEnd: async () => {
+            // ユーザーがドラッグ終了したら、順序をFirestoreへ反映
+            const cards = projectListDiv.querySelectorAll(".project-card");
+            let index = 0;
+            for (const card of cards) {
+              const id = card.dataset.id;
+              await updateDoc(doc(db, "projects", id), {
+                order: index
+              });
+              index++;
+            }
           }
-        }
-      });
+        });
+      } else {
+        // 2回目以降は、Sortableインスタンスを再初期化しなくてもOK
+        // DOMだけ入れ替えても引き続きドラッグ可能
+      }
     });
 
+    // ====================
     // 削除ボタン
+    // ====================
     projectListDiv.addEventListener("click", async (e) => {
       if (e.target.classList.contains("delete-btn")) {
-        const id = e.target.getAttribute("data-id");
+        const id = e.target.dataset.id;
         if (confirm("プロジェクトを削除してもよろしいですか？")) {
           await deleteDoc(doc(db, "projects", id));
         }
