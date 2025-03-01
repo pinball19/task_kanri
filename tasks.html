@@ -2,9 +2,11 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <!-- ビューポート指定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>タスク一覧</title>
   <link rel="stylesheet" href="styles.css">
+  <!-- SortableJS -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
@@ -52,7 +54,9 @@
       deleteDoc
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
+    // ====================
     // Firebase設定
+    // ====================
 const firebaseConfig = {
   apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
   authDomain: "taskkanri-12742.firebaseapp.com",
@@ -63,25 +67,38 @@ const firebaseConfig = {
   measurementId: "G-L9PWQP0Y53"
 };
 
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // ====================
     // URLパラメータ
+    // ====================
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get("projectId");
 
+    // ====================
+    // 要素参照
+    // ====================
     const projectInfoDiv = document.getElementById("project-info");
     const taskListDiv = document.getElementById("task-list");
     const taskForm = document.getElementById("task-form");
 
-    // 1) 新規タスク追加時に order を設定
+    // ====================
+    // Sortable初期化フラグ
+    // ====================
+    let sortableInstance = null;
+
+    // ====================
+    // 新規タスク追加
+    // ====================
     taskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("task-name").value;
       const deadline = document.getElementById("task-deadline").value;
       const assignee = document.getElementById("task-assignee").value;
       try {
-        // order に Date.now() 等を入れておく
+        // orderにDate.now()を使う例
         await addDoc(collection(db, "tasks"), {
           projectId,
           name,
@@ -97,7 +114,9 @@ const firebaseConfig = {
       }
     });
 
-    // プロジェクト情報
+    // ====================
+    // プロジェクト情報を表示
+    // ====================
     async function loadProjectInfo() {
       const projectDoc = await getDoc(doc(db, "projects", projectId));
       if (projectDoc.exists()) {
@@ -107,29 +126,37 @@ const firebaseConfig = {
     }
     loadProjectInfo();
 
-    // 2) orderBy("order", "asc") でタスクを表示
+    // ====================
+    // タスク一覧を orderBy("order", "asc") で取得
+    // ====================
     const tasksQuery = query(
       collection(db, "tasks"),
       where("projectId", "==", projectId),
       orderBy("order", "asc")
     );
 
-    // タスク一覧リアルタイム取得
     onSnapshot(tasksQuery, (snapshot) => {
       taskListDiv.innerHTML = "";
+
       snapshot.forEach((docSnap) => {
         const task = docSnap.data();
         const div = document.createElement("div");
         div.className = "task-card" + (task.completed ? " completed" : "");
-        // data-id を付与
-        div.dataset.id = docSnap.id;
+        div.dataset.id = docSnap.id; // Sortable終了時に参照
 
-        // チェックボックス + タスク名 + メタ情報
+        // 左チェックボックス + タスク名 / 期限 / 担当
         div.innerHTML = `
           <div class="task-left">
-            <input type="checkbox" ${task.completed ? "checked" : ""} data-id="${docSnap.id}" class="complete-checkbox">
+            <input
+              type="checkbox"
+              ${task.completed ? "checked" : ""}
+              data-id="${docSnap.id}"
+              class="complete-checkbox"
+            >
             <div class="task-content">
-              <span class="task-name" data-id="${docSnap.id}" style="cursor:pointer;">${task.name}</span>
+              <span class="task-name" data-id="${docSnap.id}" style="cursor:pointer;">
+                ${task.name}
+              </span>
               <div class="task-meta">
                 <span>期限: ${task.deadline || "未設定"}</span>
                 <span>担当: ${task.assignee || "未設定"}</span>
@@ -142,7 +169,7 @@ const firebaseConfig = {
           </div>
         `;
 
-        // タスク名クリック → detail.html
+        // タスク名クリック → detail.html へ
         div.querySelector(".task-name").addEventListener("click", () => {
           window.location.href = `detail.html?projectId=${projectId}&taskId=${docSnap.id}`;
         });
@@ -150,25 +177,32 @@ const firebaseConfig = {
         taskListDiv.appendChild(div);
       });
 
-      // 3) Sortable の onEnd で order を更新
-      new Sortable(taskListDiv, {
-        animation: 150,
-        handle: '.drag-handle',
-        onEnd: async () => {
-          const cards = taskListDiv.querySelectorAll(".task-card");
-          let index = 0;
-          for (let card of cards) {
-            const id = card.dataset.id;
-            await updateDoc(doc(db, "tasks", id), {
-              order: index
-            });
-            index++;
+      // ★ 初回だけ Sortable を初期化
+      if (!sortableInstance) {
+        sortableInstance = new Sortable(taskListDiv, {
+          animation: 150,
+          handle: '.drag-handle',
+          onEnd: async () => {
+            // 並べ替え完了時に order を更新
+            const cards = taskListDiv.querySelectorAll(".task-card");
+            let index = 0;
+            for (const card of cards) {
+              const id = card.dataset.id;
+              await updateDoc(doc(db, "tasks", id), {
+                order: index
+              });
+              index++;
+            }
           }
-        }
-      });
+        });
+      } else {
+        // 2回目以降は再初期化不要
+      }
     });
 
-    // タスク完了・削除イベント
+    // ====================
+    // タスク完了・削除
+    // ====================
     taskListDiv.addEventListener("click", async (e) => {
       const id = e.target.getAttribute("data-id");
       if (e.target.classList.contains("complete-checkbox")) {
