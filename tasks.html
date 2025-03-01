@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <!-- ビューポート指定 -->
+  <!-- ビューポート -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>タスク一覧</title>
   <link rel="stylesheet" href="styles.css">
@@ -54,10 +54,8 @@
       deleteDoc
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // ====================
     // Firebase設定
-    // ====================
-const firebaseConfig = {
+   const firebaseConfig = {
   apiKey: "AIzaSyCCx686jAuDr7aZUwRE2OAbkl9RoufKTb8",
   authDomain: "taskkanri-12742.firebaseapp.com",
   projectId: "taskkanri-12742",
@@ -66,39 +64,28 @@ const firebaseConfig = {
   appId: "1:181737533274:web:c6091948efb2b4e7338d63",
   measurementId: "G-L9PWQP0Y53"
 };
-
-
+  
+  
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // ====================
     // URLパラメータ
-    // ====================
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get("projectId");
 
-    // ====================
-    // 要素参照
-    // ====================
     const projectInfoDiv = document.getElementById("project-info");
     const taskListDiv = document.getElementById("task-list");
     const taskForm = document.getElementById("task-form");
 
-    // ====================
-    // Sortable初期化フラグ
-    // ====================
     let sortableInstance = null;
 
-    // ====================
     // 新規タスク追加
-    // ====================
     taskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("task-name").value;
       const deadline = document.getElementById("task-deadline").value;
       const assignee = document.getElementById("task-assignee").value;
       try {
-        // orderにDate.now()を使う例
         await addDoc(collection(db, "tasks"), {
           projectId,
           name,
@@ -114,9 +101,7 @@ const firebaseConfig = {
       }
     });
 
-    // ====================
-    // プロジェクト情報を表示
-    // ====================
+    // プロジェクト情報
     async function loadProjectInfo() {
       const projectDoc = await getDoc(doc(db, "projects", projectId));
       if (projectDoc.exists()) {
@@ -126,9 +111,7 @@ const firebaseConfig = {
     }
     loadProjectInfo();
 
-    // ====================
-    // タスク一覧を orderBy("order", "asc") で取得
-    // ====================
+    // タスク一覧 (orderBy("order","asc"))
     const tasksQuery = query(
       collection(db, "tasks"),
       where("projectId", "==", projectId),
@@ -142,9 +125,8 @@ const firebaseConfig = {
         const task = docSnap.data();
         const div = document.createElement("div");
         div.className = "task-card" + (task.completed ? " completed" : "");
-        div.dataset.id = docSnap.id; // Sortable終了時に参照
+        div.dataset.id = docSnap.id;
 
-        // 左チェックボックス + タスク名 / 期限 / 担当
         div.innerHTML = `
           <div class="task-left">
             <input
@@ -169,7 +151,7 @@ const firebaseConfig = {
           </div>
         `;
 
-        // タスク名クリック → detail.html へ
+        // タスク名クリック → detail.html
         div.querySelector(".task-name").addEventListener("click", () => {
           window.location.href = `detail.html?projectId=${projectId}&taskId=${docSnap.id}`;
         });
@@ -177,32 +159,26 @@ const firebaseConfig = {
         taskListDiv.appendChild(div);
       });
 
-      // ★ 初回だけ Sortable を初期化
+      // 初回のみ Sortable を初期化
       if (!sortableInstance) {
         sortableInstance = new Sortable(taskListDiv, {
           animation: 150,
           handle: '.drag-handle',
+          touchStartThreshold: 10, // スマホ対策
           onEnd: async () => {
-            // 並べ替え完了時に order を更新
             const cards = taskListDiv.querySelectorAll(".task-card");
             let index = 0;
             for (const card of cards) {
               const id = card.dataset.id;
-              await updateDoc(doc(db, "tasks", id), {
-                order: index
-              });
+              await updateDoc(doc(db, "tasks", id), { order: index });
               index++;
             }
           }
         });
-      } else {
-        // 2回目以降は再初期化不要
       }
     });
 
-    // ====================
     // タスク完了・削除
-    // ====================
     taskListDiv.addEventListener("click", async (e) => {
       const id = e.target.getAttribute("data-id");
       if (e.target.classList.contains("complete-checkbox")) {
